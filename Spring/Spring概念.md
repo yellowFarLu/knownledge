@@ -1,0 +1,4 @@
+依赖注入：将对象的属性赋值。这个值就已经是实例化之后的对象了。
+
+注册到容器：把BeanDefinition加入到 org.springframework.beans.factory.support.DefaultListableBeanFactory#beanDefinitionMap里面，这个的BeanDefinition相当于类，这时候还没有把该类进行实例化。
+

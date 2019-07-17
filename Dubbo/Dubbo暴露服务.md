@@ -1,0 +1,584 @@
+#暴露服务
+
+
+
+##概览
+
+dubbo暴露服务有两种情况，一种是设置了延迟暴露（比如delay=”5000”），另外一种是没有设置延迟暴露或者延迟设置为-1（delay=”-1”）：
+
+- 设置了延迟暴露，dubbo在Spring实例化bean（initializeBean）的时候会对实现了InitializingBean的类进行回调，回调方法是afterPropertySet()。ServiceBean实现了如果InitializingBean接口，重写了afterPropertySet()方法。如果设置了延迟暴露，dubbo在这个方法中进行服务的发布。
+- 没有设置延迟或者延迟为-1，dubbo会在Spring实例化完bean之后，在刷新容器最后一步发布ContextRefreshEvent事件的时候，通知实现了ApplicationListener的类进行回调onApplicationEvent，dubbo会在这个方法中发布服务。（ServiceBean实现了ApplicationListener接口）
+
+但是不管延迟与否，都是使用ServiceConfig的export()方法进行服务的暴露。使用export初始化的时候会将Bean对象转换成URL格式，所有Bean属性转换成URL的参数。
+
+
+
+### 暴露流程
+
+- 首先将服务的具体实现封装成一个Invoker，Invoker中封装了服务的实现类。
+- 将Invoker封装成Exporter，并缓存起来，缓存里使用Invoker的url的一些信息作为key。
+- 服务端Server启动，监听端口。（请求来到时，根据请求信息生成key，到缓存查找Exporter，就找到了Invoker，就可以完成调用。）
+
+
+
+###  Spring容器初始化调用
+
+当Spring容器实例化bean完成，走到最后一步发布ContextRefreshEvent事件的时候，ServiceBean会执行onApplicationEvent方法，该方法调用ServiceConfig的export方法，从而进行服务的暴露。
+
+
+
+### export的步骤简介
+
+1. 首先会检查各种配置信息，填充各种属性，总之就是保证我在开始暴露服务之前，所有的东西都准备好了，并且是正确的。
+
+2. 加载所有的注册中心，因为我们暴露服务需要注册到注册中心中去。
+
+3. 根据配置的所有协议和注册中心url分别进行服务暴露，暴露为 本地服务 或者 远程服务
+
+   3.1 不管是本地还是远程服务暴露，首先都会获取Invoker。
+
+   3.2 获取完Invoker之后，转换成对外的Exporter，并且缓存起来。
+
+
+
+### 加载所有的注册中心
+
+export方法先判断是否需要延迟暴露，如果是不延迟暴露，会执行doExport方法。
+
+doExport方法先执行一系列的检查方法，然后调用doExportUrls方法。
+
+doExportUrls方法先调用loadRegistries获取所有的注册中心url。
+
+```java
+private void doExportUrls() {
+        List<URL> registryURLs = loadRegistries(true);
+        for (ProtocolConfig protocolConfig : protocols) {
+            doExportUrlsFor1Protocol(protocolConfig, registryURLs);
+        }
+    }
+```
+
+
+
+url如下：
+
+```java
+registry://127.0.0.1:2181/com.alibaba.dubbo.registry.RegistryService?application=springProviderApplication&check=false&compiler=javassist&dubbo=2.0.2&logger=slf4j&organization=huangyuan&owner=huangyuan&pid=1689&register=true&registry=zookeeper&session=60000&subscribe=true&timestamp=1544326825698
+```
+
+- dubbo支持配置多个注册中心
+- 如果在暴漏接口的时候没有指定注册到哪个注册中心，那么它会默认注册到所有的注册中心。配置多个注册中心参考：https://www.cnblogs.com/chanshuyi/p/5144563.html
+
+![Snip20181210_1](https://ws4.sinaimg.cn/large/006tNbRwgy1fy1u4zp807j31ad0hx79h.jpg)
+
+
+
+
+
+### 根据配置的协议进行服务暴露
+
+遍历调用doExportUrlsFor1Protocol方法。doExportUrlsFor1Protocol根据不同的 **协议** 将 **服务provider** 转换为URL形式，一些**配置参数**会附在URL后面。
+
+如果是暴露远程服务，则经过上面的操作之后，url变成：
+
+```java
+dubbo://192.168.1.4:23801/com.huang.yuan.api.service.DemoService2?anyhost=true&application=springProviderApplication&bind.ip=192.168.1.4&bind.port=23801&compiler=javassist&default.cluster=failover&default.delay=-1&default.loadbalance=random&default.proxy=javassist&default.retries=2&default.serialization=hessian2&default.timeout=3000&delay=-1&dubbo=2.0.2&generic=false&interface=com.huang.yuan.api.service.DemoService2&logger=slf4j&methods=demoTest&organization=huangyuan&owner=huangyuan&pid=1831&revision=1.0-SNAPSHOT&side=provider&timestamp=1544327969839&version=1.0
+```
+
+接下来，根据scope的值，进行服务暴露。
+
+- 如果scope配置为none则不暴露
+- 如果scope不是remote，则本地暴露exportLocal；
+- 如果scope不是local，则暴露远程服务
+
+
+
+疑惑点：
+
+（1）scope的值默认是null，按照代码的逻辑，会进行本地暴露，又进行远程暴露，为什么呢？
+
+（2）关于（1）的解答，我觉得既然用户不设置为“不暴露”，也不设置为“只暴露远程服务”，也不设置为“只暴露本地服务”，那么dubbo就认为所以都需要进行暴露。
+
+
+
+#### 暴露为远程服务
+
+先获取Invoker，然后导出成Exporter
+
+```java
+// 1、具体实现类 -》Invoker的过程
+// 根据 服务具体实现、实现接口、以及registryUrl，通过ProxyFactory将XXXServiceImpl封装成一个本地执行的Invoker
+// invoker是对具体实现的一种代理。
+Invoker<?> invoker = proxyFactory.getInvoker(ref, (Class) interfaceClass, registryURL.addParameterAndEncoded(Constants.EXPORT_KEY, url.toFullString()));
+ 
+ // 2、服务导出  invoker -》 exporter
+ // 使用Protocol将invoker导出成一个Exporter
+ // 暴露封装服务invoker
+ // 调用Protocol生成的适配类的export方法
+ Exporter<?> exporter = protocol.export(invoker);
+```
+
+
+
+##### 暴露远程服务时的获取Invoker过程
+
+这里会调用com.alibaba.dubbo.rpc.proxy.javassist.JavassistProxyFactory#getInvoker获取
+
+```java
+public <T> Invoker<T> getInvoker(T proxy, Class<T> type, URL url) {
+    // DemoService2Impl
+    // 封装一个Wrapper类，如果类是以$开头，就使用接口类型获取，其他的使用实现类获取  
+    final Wrapper wrapper = Wrapper.getWrapper(proxy.getClass().getName().indexOf('$') < 0 ? proxy.getClass() : type);
+    
+    // 返回一个Invoker实例，doInvoke方法中直接返回 wrapper的invokeMethod
+    // 关于生成的wrapper，请看下面列出的生成的代码，其中invokeMethod方法中就有实现类对实际方法的调用
+    // 外部调用 doInvoke -》 invokeMethod -》真实的方法
+    return new AbstractProxyInvoker<T>(proxy, type, url) {
+        @Override
+        protected Object doInvoke(T proxy, String methodName, 
+                                  Class<?>[] parameterTypes, 
+                                  Object[] arguments) throws Throwable {
+            return wrapper.invokeMethod(proxy, methodName, parameterTypes, arguments);
+        }
+    };
+}
+```
+
+
+
+这里生成Wrapper对象，利用了javasisst动态代理技术，生成的代码如下：
+
+```java
+public Object invokeMethod(Object o, String n, Class[] p, Object[] v) { 
+    // 持有实际对象的引用
+    com.huang.yuan.dubbo.service.impl.DemoService2Impl w; 
+    
+     // 获取实际调用对象（进行类型转换）
+     w = ((com.huang.yuan.dubbo.service.impl.DemoService2Impl)$1); 
+    
+    // 执行真正的方法调用 (demoTest是接口中真正需要执行的方法)
+    w.demoTest((java.lang.String)$4[0]);                                                                                                                 }
+```
+
+由此可见，Invoker执行方法的时候，会调用doInvoke方法，会调用Wrapper的invokeMethod，这个方法中会有的实现类调用真实方法的代码。
+
+（代码可以从com.alibaba.dubbo.common.bytecode.Wrapper#makeWrapper中获得）
+
+
+
+#### 本地暴露
+
+```java
+private void exportLocal(URL url) {
+    if (!Constants.LOCAL_PROTOCOL.equalsIgnoreCase(url.getProtocol())) {
+    	// 这时候转成本地暴露的url：injvm://127.0.0.1/dubbo.common.hello.service.HelloService?anyhost=true&......
+        URL local = URL.valueOf(url.toFullString())
+                .setProtocol(Constants.LOCAL_PROTOCOL)
+                .setHost(NetUtils.LOCALHOST)
+                .setPort(0);
+        // 首先还是先获得Invoker，然后导出成Exporter，并缓存
+        // 这里的proxyFactory实际是JavassistProxyFactory
+        // 导出expter使用com.alibaba.dubbo.rpc.protocol.injvm.InjvmProtocol#export
+        Exporter<?> exporter = protocol.export(
+                proxyFactory.getInvoker(ref, (Class) interfaceClass, local));
+        exporters.add(exporter);
+        logger.info("Export dubbo service " + interfaceClass.getName() +" to local registry");
+    }
+}
+```
+
+
+
+
+
+### 导出Invoker为Exporter
+
+org.apache.dubbo.registry.integration.RegistryProtocol#export方法
+
+```java
+@Override
+    public <T> Exporter<T> export(final Invoker<T> originInvoker) throws RpcException {
+        // 1、将invoker转成exporter
+        final ExporterChangeableWrapper<T> exporter = doLocalExport(originInvoker);
+
+        // 获取RegistryUrl
+        URL registryUrl = getRegistryUrl(originInvoker);
+
+        /*
+         * 2、根据invoker中的url获取Registry实例
+         * 并且连接到注册中心
+         * 此时提供者作为消费者 引用 注册中心的核心服务 RegistryService
+         */
+        final Registry registry = getRegistry(originInvoker);
+
+        // 注册到注册中心的URL，如 dubb://XXXXX
+        final URL registeredProviderUrl = getRegisteredProviderUrl(originInvoker);
+
+        // 判断是否延迟发布
+        boolean register = registeredProviderUrl.getParameter("register", true);
+
+        // 将originInvoker加入本地缓存
+        ProviderConsumerRegTable.registerProvider(originInvoker, registryUrl, registeredProviderUrl);
+
+        if (register) {
+            /*
+             *  3、调用远端注册中心的register方法进行服务注册
+             *  若有消费者订阅此服务，则推送消息让消费者引用此服务。
+             *  注册中心缓存了所有提供者注册的服务以供消费者发现。
+             */
+            register(registryUrl, registeredProviderUrl);
+            ProviderConsumerRegTable.getProviderWrapper(originInvoker).setReg(true);
+        }
+
+        /*
+         *  订阅override数据
+         *
+         *  提供者订阅时，会影响 同一JVM即暴露服务，又引用同一服务的的场景，
+         *  因为subscribed以服务名为缓存的key，导致订阅信息覆盖。
+         */
+        final URL overrideSubscribeUrl = getSubscribedOverrideUrl(registeredProviderUrl);
+        final OverrideListener overrideSubscribeListener = new OverrideListener(overrideSubscribeUrl, originInvoker);
+        overrideListeners.put(overrideSubscribeUrl, overrideSubscribeListener);
+
+        /*
+         * 4、提供者向注册中心订阅所有注册服务
+         * 当注册中心有此服务的覆盖配置注册进来时，推送消息给提供者，重新暴露服务，这由管理页面完成。
+         */
+        registry.subscribe(overrideSubscribeUrl, overrideSubscribeListener);
+
+        /*
+         *  5、保证每次export都返回一个新的exporter实例
+         *  返回暴露后的Exporter给上层ServiceConfig进行缓存，便于后期撤销暴露。
+         */
+        return new DestroyableExporter<T>(exporter, originInvoker, overrideSubscribeUrl, registeredProviderUrl);
+    }
+```
+
+
+
+##### 将invoker转成exporter
+
+```java
+## org.apache.dubbo.registry.integration.RegistryProtocol#doLocalExport方法
+private <T> ExporterChangeableWrapper<T> doLocalExport(final Invoker<T> originInvoker) {
+		// protocol = "dubbo"
+        // 调用代码中的protocol.export方法，会根据协议名选择调用具体的实现类
+                    // 这里会调用 DubboProtocol 的export方法
+                    // 导出完之后，返回一个新的ExporterChangeableWrapper实例
+                    exporter = new ExporterChangeableWrapper<T>((Exporter<T>) protocol.export(invokerDelegete), originInvoker);
+                    ......
+}
+```
+
+DubboProtocol的export方法实现：
+
+```java
+   @Override
+    public <T> Exporter<T> export(Invoker<T> invoker) throws RpcException {
+
+        // 获取需要暴露的url
+        URL url = invoker.getUrl();
+
+        /*
+         * 通过url获取key
+         *
+         * key的例子：com.huang.yuan.api.service.DemoService2:1.0:23801
+         * 在服务调用的时候，同样通过这个key获取exporter
+         */
+        String key = serviceKey(url);
+
+        // 生成exporter实例
+        DubboExporter<T> exporter = new DubboExporter<T>(invoker, key, exporterMap);
+
+        // 缓存exporter
+        exporterMap.put(key, exporter);
+
+        /*
+         * todo 没理解 Constants.STUB_EVENT_KEY
+         *  是否支持本地存根
+         *  项目使用远程服务后，客户端通常只剩下接口，而实现全在服务器端
+         *
+         *  但提供方有些时候想在客户端也执行部分逻辑，
+         *      比如：做ThreadLocal缓存，提前验证参数，调用失败后伪造容错数据等等，此时就需要在API中带上Stub
+         *
+         *  客户端生成Proxy实例，会把Proxy通过构造函数传给Stub，然后把Stub暴露给用户，Stub可以决定要不要去调Proxy
+         */
+        Boolean isStubSupportEvent = url.getParameter(Constants.STUB_EVENT_KEY, Constants.DEFAULT_STUB_EVENT);
+
+        // 是否回调服务
+        Boolean isCallbackservice = url.getParameter(Constants.IS_CALLBACK_SERVICE, false);
+
+        if (isStubSupportEvent && !isCallbackservice) {
+            String stubServiceMethods = url.getParameter(Constants.STUB_EVENT_METHODS_KEY);
+            if (stubServiceMethods == null || stubServiceMethods.length() == 0) {
+                if (logger.isWarnEnabled()) {
+                    logger.warn(new IllegalStateException("consumer [" + url.getParameter(Constants.INTERFACE_KEY) +
+                            "], has set stubproxy support event ,but no stub methods founded."));
+                }
+            } else {
+                stubServiceMethodsMap.put(url.getServiceKey(), stubServiceMethods);
+            }
+        }
+
+        // 根据URL绑定IP与端口，建立NIO框架的Server
+        openServer(url);
+
+        optimizeSerialization(url);
+
+        return exporter;
+    }
+```
+
+
+
+#####  获取Register实例
+
+```java
+/*
+ * 根据invoker中的url获取Registry实例
+ * 并且连接到注册中心
+ * 此时提供者作为消费者 引用 注册中心的核心服务 RegistryService
+ */
+final Registry registry = getRegistry(originInvoker);
+```
+
+具体的操作在中org.apache.dubbo.registry.integration.RegistryProtocol
+
+```java
+/**
+     * 根据invoker的地址获取registry实例
+     *
+     * @param originInvoker
+     * @return
+     */
+    private Registry getRegistry(final Invoker<?> originInvoker) {
+        URL registryUrl = getRegistryUrl(originInvoker);
+        /*
+         * 根据SPI机制获取具体的Registry实例，
+         *   会调用到com.alibaba.dubbo.registry.support.AbstractRegistryFactory#getRegistry
+         * 这里获取到的是ZookeeperRegistry
+         */
+        return registryFactory.getRegistry(registryUrl);
+    }
+```
+
+这里会调用到org.apache.dubbo.registry.support.AbstractRegistry#AbstractRegistry的构造方法
+
+```java
+   public AbstractRegistry(URL url) {
+        // 设置注册中心url
+        setUrl(url);
+
+        // 是否开启"文件保存定时器"
+        syncSaveFile = url.getParameter(Constants.REGISTRY_FILESAVE_SYNC_KEY, false);
+
+        /*
+         * 保存的文件名称为：
+         * /Users/huangyuan/.dubbo/dubbo-registry-springProviderApplication-127.0.0.1:2181.cache
+         *
+         * dubbo中zookeeper做注册中心,如果注册中心集群都挂掉,那发布者和订阅者还能通信吗?
+         *
+         * 能，dubbo会将zookeeper的信息缓存到本地，
+         * 作为一个缓存文件,并且转换成properties对象方便使用
+         * 
+         * 该文件在注册中心通知的时候，进行存储更新  notify(url.getBackupUrls());
+         */
+        String filename = url.getParameter(Constants.FILE_KEY, System.getProperty("user.home") + "/.dubbo/dubbo-registry-" + url.getParameter(Constants.APPLICATION_KEY) + "-" + url.getAddress() + ".cache");
+
+        File file = null;
+
+        if (ConfigUtils.isNotEmpty(filename)) {
+            file = new File(filename);
+            if (!file.exists() && file.getParentFile() != null && !file.getParentFile().exists()) {
+                // 不存在则创建
+                if (!file.getParentFile().mkdirs()) {
+                    throw new IllegalArgumentException("Invalid registry store file " + file + ", cause: Failed to create directory " + file.getParentFile() + "!");
+                }
+            }
+        }
+
+        this.file = file;
+
+        /*
+         * 加载文件中的属性，key-value形式，示例如下：
+         * "group1/com.huang.yuan.api.service.DemoService:1.0" -> "empty://192.168.1.2:23801/com.huang.yuan.api.service.DemoService?anyhost=true&application=springProviderApplication..."
+         */
+        loadProperties();
+
+        // 通知订阅
+        // url.getBackupUrls() 获取的是注册中心的url
+        notify(url.getBackupUrls());
+    }
+```
+
+
+
+#####  注册服务到注册中心
+
+RegistryProtocol注册服务到注册中心（这里注册中心是Zookeeper，因此最终的注册操作是在org.apache.dubbo.registry.zookeeper.ZookeeperRegistry中执行，代码如下）
+
+```java
+  @Override
+    protected void doRegister(URL url) {
+        try {
+            /*
+             * 这里zkClient就是我们上面调用构造的时候生成的 ZkClientZookeeperClient
+             * ZkClientZookeeperClient 保存着连接到Zookeeper的zkClient实例
+             * 开始注册，也就是在Zookeeper中创建节点s
+             * 这里toUrlPath获取到的path为：（类似）
+             *                  /dubbo/com.huang.yuan.api.service.DemoService2/provider.....
+             *                  这就是在Zookeeper上面创建的文件夹路径及节点
+             * 默认创建的节点是临时节点
+             */
+            zkClient.create(toUrlPath(url), url.getParameter(Constants.DYNAMIC_KEY, true));
+        } catch (Throwable e) {
+            throw new RpcException("Failed to register " + url + " to zookeeper " + getUrl() + ", cause: " + e.getMessage(), e);
+        }
+    }
+```
+
+
+
+##### 订阅服务
+
+com.alibaba.dubbo.registry.support.FailbackRegistry向注册中心订阅服务
+
+```java
+public void subscribe(URL url, NotifyListener listener) {
+        super.subscribe(url, listener);
+
+        removeFailedSubscribed(url, listener);
+
+        try {
+            /*
+             * 想注册中心发送订阅请求
+             * 这里有一个地方比较有意思，就是自己的服务、依赖外部的服务，都会进行订阅。
+             * 这一步之后就会在/dubbo/dubbo.common.hello.service/XXXService节点下多一个configurators节点
+             */
+            doSubscribe(url, listener);
+        } catch (Exception e) {
+            ......
+        }
+    }
+```
+
+在org.apache.dubbo.registry.zookeeper.ZookeeperRegistry#doSubscribe完成订阅特定服务的操作。
+
+```java
+List<URL> urls = new ArrayList<URL>();
+
+                /*
+                 * toCategoriesPath是获取分类路径
+                 *      比如说获取的path数组，含有下面3个值
+                 *      /dubbo/com.huang.yuan.api.service.DemoService2/providers
+                 *      /dubbo/com.huang.yuan.api.service.DemoService2/configurators
+                 *      /dubbo/com.huang.yuan.api.service.DemoService2/routers
+                 */
+                for (String path : toCategoriesPath(url)) {
+
+                    // 获取监听器的集合
+                    ConcurrentMap<NotifyListener, ChildListener> listeners = zkListeners.get(url);
+                    if (listeners == null) {
+                        zkListeners.putIfAbsent(url, new ConcurrentHashMap<NotifyListener, ChildListener>());
+                        listeners = zkListeners.get(url);
+                    }
+
+                    // 监听器
+                    ChildListener zkListener = listeners.get(listener);
+
+                    if (zkListener == null) {
+                        listeners.putIfAbsent(listener, new ChildListener() {
+                            @Override
+                            public void childChanged(String parentPath, List<String> currentChilds) {
+                                // 这里设置了监听回调的地址,即回调给FailbackRegistry中的notify
+                                ZookeeperRegistry.this.notify(url, listener, toUrlsWithEmpty(url, parentPath, currentChilds));
+                            }
+                        });
+                        zkListener = listeners.get(listener);
+                    }
+
+                    // 根据路径path创建节点
+                    zkClient.create(path, false);
+                    // 添加子节点监听器
+                    List<String> children = zkClient.addChildListener(path, zkListener);
+
+                    if (children != null) {
+                        urls.addAll(toUrlsWithEmpty(url, path, children));
+                    }
+                }
+
+                // 通知消费者
+                // 在org.apache.dubbo.registry.support.FailbackRegistry.notify中发布操作
+                notify(url, listener, urls);
+            }
+```
+
+会创建监听器，当订阅的服务有变更的时候，注册中心就会调用com.alibaba.dubbo.registry.NotifyListener#notify方法，告诉消费者。
+
+这里有一个点，就是服务引用和服务暴露的过程中，都会进行订阅和通知，并且他们的走的是同样的代码逻辑。
+
+AbstractRegistry—》 FailbackRegistry—》ZookeeperRegistry
+
+
+
+##### 返回expoter
+
+到这一步，就是简单的封装一下exporter，返回。终于，导出完成了。
+
+
+
+### 扩展
+
+#### Filter链的构建过程
+
+其实在Protocol进行导出之前，会经过com.alibaba.dubbo.rpc.protocol.ProtocolFilterWrapper这个这个类，在这个类中，会进行Filter链的构建
+
+```java
+    // 构建Filter链
+    private static <T> Invoker<T> buildInvokerChain(final Invoker<T> invoker, String key, String group) {
+        Invoker<T> last = invoker;
+
+        /*
+         * 通过Filter的ExtendLoader实例获取其激活的filter列表，getActivateExtension逻辑分为两部分：
+         * 1.加载标注了Activate注解的filter列表
+         * 2.加载用户在spring配置文件中手动注入的filter列表
+         */
+        List<Filter> filters = ExtensionLoader.getExtensionLoader(Filter.class).getActivateExtension(invoker.getUrl(), key, group);
+
+        if (!filters.isEmpty()) {
+
+            for (int i = filters.size() - 1; i >= 0; i--) {
+                final Filter filter = filters.get(i);
+                final Invoker<T> next = last;
+                last = new Invoker<T>() {
+
+              		...
+
+                    @Override
+                    public Result invoke(Invocation invocation) throws RpcException {
+                        return filter.invoke(next, invocation);
+                    }
+					...
+                };
+            }
+        }
+        return last;
+    }
+```
+
+构建后的Filter链如图：
+
+![Snip20181210_3](https://ws3.sinaimg.cn/large/006tNbRwgy1fy224xw2t9j31k60i4myw.jpg)
+
+结合代码就可以知道，为什么Filter链能够依次执行。因为buildInvokerChain最终返回的是一个Invoker对象。
+
+这里我们假设返回的是Invoker1对象。外部调用Invoker1对象的invoker方法如下：
+
+```java
+@Override
+public Result invoke(Invocation invocation) throws RpcException {
+    return filter.invoke(next, invocation);
+}
+```
+
+很明显，会调用Filter1的invoker方法。而Filter1的invoker方法的invoker方法末尾，会调用next，也就是Invoker2的invoke方法，同样会进行filter.invoke(next, invocation)的调用。如此循环，依次执行。最终执行到原始Invoker的invoke方法。
