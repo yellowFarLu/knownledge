@@ -12,7 +12,7 @@
 
 - 在Router中,将上一步的全部invokers挑选出满足条件的invokers
 
-- 在LoadBalance中,将上一步的能正常的执行invokers中,根据配置的负载均衡策略,挑选出需要执行的invoker
+- 在LoadBalance中,将上一步的能正常的执行invokers中，根据配置的负载均衡策略,挑选出需要执行的invoker
 
 
 

@@ -358,6 +358,29 @@ public static void main(String[] args) {
 
 
 
+###IO多路复用
+
+java里面的NIO使用了**IO多路复用模型**。
+
+在IO多路复用模型中，会有一条线程（java中的selector）不断去轮询多个socket的状态（这些socket可能是读写网络、磁盘等），只有当socket真正有读写事件时，才真正调用IO读写操作。
+
+因此，在IO多路复用模型中，只需要一条线程就可以管理多个socket，系统不需要建立新的线程，也不必维护这些线程，并且只有真正有socket读写事件的时候，才会使用IO资源，所以它大大减少了
+
+参考: https://www.cnblogs.com/zwt1990/p/8821185.html
+
+
+
+###Java NIO优点
+
+- 在IO中，IO线程可能一直在等待网络，不能处理其他事；而在NIO中，只有在真正有读写请求的时候，才调用IO线程进行处理（只有selector线程一直在轮询）。
+- Java NIO使用IO多路复用，避免每一个请求都有一条线程进行处理，减少了内存消耗，线程上下文切换。
+
+
+
+
+
+
+
 ## API
 
 首先理解几个个概念。 mark标记、position位置、limit界限、capacity容量
