@@ -13,7 +13,7 @@ ReentrantLock 的newCondition():最终调用的是AQS中的内部类**ConditionO
 
 ## await()
 
-首先执行await的线程此时已经获取到了**独占锁**（成功改变同步状态），创建该线程的节点放到ConditionObject的条件队列尾部，之后release唤醒同步队列的下一个线程，之后就LockSupport.park挂起当前线程。
+首先执行await的线程此时已经获取到了**独占锁**（成功改变同步状态），创建该线程的节点放到ConditionObject的条件队列尾部，之后释放当先线程的所有锁，唤醒同步队列的下一个线程，之后就LockSupport.park挂起当前线程。
 
 
 
