@@ -527,6 +527,12 @@ AbstractRegistry—》 FailbackRegistry—》ZookeeperRegistry
 
 
 
+
+
+
+
+
+
 ### 扩展
 
 #### Filter链的构建过程
