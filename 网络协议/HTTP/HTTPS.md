@@ -32,7 +32,7 @@ HTTPS并非是一种新协议，只不过HTTP的通信接口部分使用SSL代�
 
 ![image-20190919224916551](http://ww3.sinaimg.cn/large/006y8mN6gy1g757pb7iv6j30yc0go42i.jpg)
 
-采用SSL后，HTTP就具有HTTPS的加密、证书、完整新保护的功能。
+采用SSL后，HTTP就具有HTTPS的加密、证书、完整性保护的功能。
 
 SSL是独立于HTTP的协议，所以其他协议也可以搭配SSL使用。
 
