@@ -262,4 +262,8 @@ Eden区是连续的空间，且Survivor总有一个为空。经过一次GC和复
 
 
 
-参考：https://blog.csdn.net/mccand1234/article/details/52078645
+## 参考
+
+https://blog.csdn.net/mccand1234/article/details/52078645
+
+重点：  https://www.cnblogs.com/aspirant/p/8662690.html、https://www.cnblogs.com/aspirant/category/1195271.html
