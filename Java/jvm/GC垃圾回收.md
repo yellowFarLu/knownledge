@@ -35,12 +35,29 @@ JVM的垃圾回收机制，在内存充足的情况下，除非你显式调用Sy
 
 ### 方法区中的垃圾回收
 
-- 常量池中一些常量、符号引用没有被引用，则会被清理出常量池
+方法区主要回收的内容有：**废弃常量和无用的类**。对于废弃常量也可通过引用的可达性来判断，但是对于无用的类则需要同时满足下面3个条件：
 
-- 无用的类：被判定为无用的类，会被清理出方法区。判定方法如下：
-  - 该类的所有实例被回收
-  - 加载该类的ClassLoader被回收
-  - 该类的Class对象没有被引用
+- 该类所有的实例都已经被回收，也就是Java堆中不存在该类的任何实例；
+- 加载该类的`ClassLoader`已经被回收；
+- 该类对应的`java.lang.Class`对象没有在任何地方被引用，无法在任何地方通过反射访问该类的方法。
+
+**这里解释下为什么需要回收该类的ClassLoader？**
+
+```java
+public Class<?> getDeclaringClass() throws SecurityException {
+        final Class<?> candidate = getDeclaringClass0();
+  /*
+  * 反射里面使用到ClassLoader，因此要把ClassLoader干掉，才能保证没有地方可以通过反射调用到Class类。
+  * 然后当类的实例都会被回收了，并且该类没有在任何地方被引用到了，那么这个类就可以被回收了
+  */
+  if (candidate != null)
+  candidate.checkPackageAccess(
+  ClassLoader.getClassLoader(Reflection.getCallerClass()), true);
+  return candidate;
+}
+```
+
+
 
 
 
@@ -267,3 +284,5 @@ Eden区是连续的空间，且Survivor总有一个为空。经过一次GC和复
 https://blog.csdn.net/mccand1234/article/details/52078645
 
 重点：  https://www.cnblogs.com/aspirant/p/8662690.html、https://www.cnblogs.com/aspirant/category/1195271.html
+
+[https://www.cnblogs.com/1024Community/p/honery.html#25-%E6%96%B9%E6%B3%95%E5%8C%BA%E5%A6%82%E4%BD%95%E5%88%A4%E6%96%AD%E6%98%AF%E5%90%A6%E9%9C%80%E8%A6%81%E5%9B%9E%E6%94%B6](https://www.cnblogs.com/1024Community/p/honery.html#25-方法区如何判断是否需要回收)
