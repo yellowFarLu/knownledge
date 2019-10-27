@@ -8,6 +8,7 @@
    - 找到资源文件，载入。
    - 把资源文件转化成DOM元素
 - 注册到IoC中
+   - 把BeanDefinition加入到 org.springframework.beans.factory.support.DefaultListableBeanFactory#beanDefinitionMap里面，这个的BeanDefinition相当于类，这时候还没有把该类进行实例化。
 - 关键类：org.springframework.beans.factory.xml.XmlBeanDefinitionReader#registerBeanDefinitions
    - 这时候bean还没有实例化
 - 注册的过程主要是DOM元素转化为BeanDefinition，并且存放到Map中。把DOM元素转化为BeanDefinition主要由NamespaceHandler决定，这里也体现了Spring的扩展性
@@ -15,7 +16,7 @@
 - 注册所有的 BeanPostProcessor;
 - 单例Bean的实例化（开始Bean的生命周期） org.springframework.context.support.AbstractApplicationContext#finishBeanFactoryInitialization
 - 调用beanPostProcessor的地方org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsAfterInitialization
-   - 依赖注入
+   - 依赖注入：将对象的属性赋值。这个值就已经是实例化之后的对象了。
 
 
 
