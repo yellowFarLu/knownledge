@@ -1,11 +1,32 @@
-## 注册Handler
-
-（把url和Handler注册到Map中）
-
-一个Controller里面的方法对应于一个Handler
+# spring-mvc
 
 
 
-##请求执行
+## 流程
 
-通过url找到对应Handler，然后执行
+- tomcat启动后，事件通知回调spring进行初始化
+- 注册Handler
+  - 创建Handler并且封装一层适配器
+  - 把url和Handler注册到HandlerMapping中（HandlerMapping其实就是一个Map）
+  - Controller里面的一个方法对应于一个Handler
+- 请求执行
+  - 请求到达前端控制器DispatcherServlet
+  - DispatcherServlet到HandlerMapping查找Handler（通过url找到对应Handler）
+  - DispatcherServlet调用适配器去执行Handler
+    - 这里解释下为什么会多一层适配器，其实就是为了扩展。能够在请求调用前后进行一些操作。
+  - handler执行完毕后，把ModelAndView提交给适配器
+  - 适配器再把ModelAndView提交给DispatcherServlet
+  - DispatcherServlet请求视图解析器去进行视图解析 （根据逻辑视图名解析成真正的视图，如jsp)
+    - ViewResolver 的配置，从而将逻辑视图名解析为具体视图技术
+  - DispatcherServlet渲染视图
+  - 响应结果
+
+
+
+![image-20191027190105898](https://tva1.sinaimg.cn/large/006y8mN6gy1g8cynmdehlj31660kkgvl.jpg)
+
+
+
+## 参考
+
+[spring-mvc流程详解](https://www.cnblogs.com/leskang/p/6101368.html)

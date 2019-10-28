@@ -1,28 +1,6 @@
-- [深入理解动态代理](#1)
-    - [代理模式](#1.1)
-        - [静态代理](#1.1.1)
-        - [动态代理](#1.1.2)
-    - [Java动态代理](#1.2)
-        - [类加载机制](#1.2.1)
-        - [动态代理加载机制](#1.2.2)
-        - [JDK](#1.2.3)
-        - [Cglib](#1.2.4)
-        - [Javassist](#1.2.5)
-        - [ASM](#1.2.6)
-        - [性能比较](#1.2.7)
-    - [参考文档](#1.3)
-    - [附录](#1.4)
-        - [公用类](#1.4.1)
-        - [静态代理 demo](#1.4.2)
-        - [JDK demo](#1.4.3)
-        - [JDK动态代理字节码源码](#1.4.4)
-        - [Cglib demo](#1.4.5)
-        - [Cglib动态代理字节码源码](#1.4.6)
-        - [Javassist demo](#1.4.7)
-        - [Javassist动态代理字节码源码](#1.4.8)
-    <!-- TOC -->
+#深入理解动态代理
 
-# 深入理解动态代理
+
 
 ## 代理模式
 
@@ -42,23 +20,35 @@
 
 ![](https://ws1.sinaimg.cn/large/006tNbRwgy1fxwzsi18sbj30ir0f3q42.jpg)
 
-###  <h id="1.1.1"/>静态代理
 
--   程序运行前就已经存在代理类的字节码文件,代理类和委托类的关系在运行前就已经确定了;
+
+### 静态代理
+
+-   **程序运行前就已经存在代理类的字节码文件**，代理类和委托类的关系在运行前就已经确定了;
 -   优点
-    -   业务类只需要关注业务逻辑本身，保证了业务类的重用性;
+    
+    -   业务类只需要关注业务逻辑本身，保证了业务类的重用性
 -   缺点
-    -   代理对象的一个接口只服务于一种类型的对象，如果要代理的方法很多，势必要为每一种方法都进行代理，静态代理在程序规模稍大时就无法胜任了;
-    -   如果接口增加一个方法，除了所有实现类需要实现这个方法外，所有代理类也需要实现此方法。增加了代码维护的复杂度;
+    - **代理对象只服务于一种类型的对象**，如果要代理的对象很多，势必要为每一种对象都进行代理，静态代理在程序规模稍大时就无法胜任了
+    
+      -   比如Car类的move()方法需要记录日志，如果还有汽车，火车，自行车类的move()方法也需要记录日志，我们都要一个个的去为它们生成代理类，太麻烦了。
+    
+    - 如果接口增加一个方法，除了所有实现类需要实现这个方法外，所有代理类也需要实现此方法。增加了代码维护的复杂度
+    
+      
 
 ###  动态代理
 
-动态代理类的源码是在程序运行期间由JVM根据反射等机制动态的生成，所以不存在代理类的字节码文件。代理类和委托类的关系是在程序运行时确定。
+**动态代理类的源码是在程序运行期间由JVM根据反射机制动态的生成**，所以不存在代理类的字节码文件。**代理类和委托类的关系是在程序运行时确定。**
 
 优点:
 
  - 一个动态代理可以服务于多种不同类型的对象。
- - 接口增加方法，动态代理无需变动
+ - 被代理类接口增加方法，动态代理无需变动
+
+
+
+
 
 ## Java动态代理
 
@@ -66,55 +56,114 @@
 
 ![](https://ws1.sinaimg.cn/large/006tNbRwgy1fxwxytw2u6j30j00dnwfy.jpg)
 
-### 动态代理加载机制
+
+
+### 动态代理类加载机制
 
 ![](https://ws3.sinaimg.cn/large/006tNbRwgy1fxwy05udwlj30pn0e7abx.jpg)
 
+
+
 ### JDK
 
-关键代码
+通过实现接口的方式生成代理类。
 
--   [**创建调用处理类**\] 实现 java.lang.reflect.InvocationHandler接口,
-    实现它的 **java.lang.reflect.InvocationHandler\#invoke(Object proxy,
-    Method method, Object\[\] args) throws Throwable**接口;
--   \[**创建动态代理类实例**\] 调用
-    **java.lang.reflect.Proxy\#newProxyInstance(ClassLoader
-    loader,Class\<?\>\[\] interfaces,InvocationHandler h) throws
-    IllegalArgumentException** 方法,
-    传递上面创建的InvocationHandler实例, 创建动态代理实例;
--   jdk动态代理类: **public final class \$Proxy0 extends Proxy
-    implements TargetInterface**
+比如现在想为RealSubject这个类创建一个动态代理对象，JDK主要会做以下工作：
 
-jdk动态代理的机制特点
+- 获取 RealSubject上的所有接口列表；
 
--   包：如果所代理的接口都是 public
-    的，那么它将被定义在顶层包（即包路径为空），如果所代理的接口中有非
-    public 的接口（因为接口不能被定义为 protect 或 private，所以除
-    public 之外就是默认的 package
-    访问级别），那么它将被定义在该接口所在包（假设代理了
-    com.ibm.developerworks 包中的某非 public 接口
-    A，那么新生成的代理类所在的包就是
-    com.ibm.developerworks），这样设计的目的是为了最大程度的保证动态代理类不会因为包管理的问题而无法被成功定义并访问；
--   类修饰符：该代理类具有 final 和 public
-    修饰符，意味着它可以被所有的类访问，但是不能被再度继承；
--   类名：格式是"\$ProxyN"，其中 N 是一个逐一递增的阿拉伯数字，代表
-    Proxy 类第 N 次生成的动态代理类，值得注意的一点是，并不是每次调用
-    Proxy 的静态方法创建动态代理类都会使得 N
-    值增加，原因是如果对同一组接口（包括接口排列的顺序相同）试图重复创建动态代理类，它会很聪明地返回先前已经创建好的代理类的类对象，而不会再尝试去创建一个全新的代理类，这样可以节省不必要的代码重复生成，提高了代理类的创建效率;
+- 确定要生成的代理类的类名，默认为：com.sun.proxy.$ProxyXXXX ；
 
-代理类实例的特点
+- 根据需要实现的接口信息，在代码中动态创建 该Proxy类的字节码；
 
--   每个实例都会关联一个调用处理器对象，可以通过 Proxy 提供的静态方法
+- 将对应的字节码转换为对应的class 对象；
+
+- **创建InvocationHandler 实例handler**，用来处理Proxy所有方法调用；
+
+- Proxy 的class对象 以创建的handler对象为参数，**实例化一个proxy对象**
+
+
+
+JDK通过 java.lang.reflect.Proxy包来支持动态代理，一般情况下，我们使用下面的newProxyInstance方法
+
+```java
+// 返回一个指定接口的代理类实例，该接口可以将方法调用指派到指定的调用处理程序。
+public static Object newProxyInstance(ClassLoader loader,Class<?>[] interfaces,InvocationHandler h)
+```
+
+而对于InvocationHandler，我们需要实现下列的invoke方法。
+
+在调用代理对象中的每一个方法时，在代码内部，都是直接调用了InvocationHandler 的invoke方法，而invoke方法根据代理类传递给自己的method参数来区分是什么方法。
+
+
+
+**仔细观察可以看出生成的动态代理类有以下特点**
+
+- 继承自 java.lang.reflect.Proxy，实现了 Rechargable,Vehicle 这两个ElectricCar实现的接口；
+
+- 类中的所有方法都是final 的；
+
+- 所有的方法功能的实现都统一调用了InvocationHandler的invoke()方法。
+
+![image-20191027162340738](https://tva1.sinaimg.cn/large/006y8mN6gy1g8cu3t3tcxj30w203ejxf.jpg)
+
+
+
+**Jdk动态代理的机制特点**
+
+-   包：
+    
+    -   如果所代理的接口interface都是 public的，那么它将被定义在顶层包（即包路径为空）
+    -   如果所代理的接口中有非public 的接口，那么它将被定义在该接口所在包。（**保证代理类能够访问被代理类**）
+    
+    （假设代理了com.ibm.developerworks 包中的某非 public 接口A，那么新生成的代理类所在的包就是
+    com.ibm.developerworks），这样设计的目的是**为了最大程度的保证动态代理类不会因为包管理的问题而无法被成功定义并访问**
+    
+-   类修饰符：
+    
+    -   代理类具有 final 和 public修饰符，意味着**代理类可以被所有的类访问，但是不能被再度继承**；
+    
+-   类名：
+    
+    -   格式是"\$ProxyN"，其中 N 是一个逐一递增的阿拉伯数字，代表Proxy 类第 N 次生成的动态代理类。值得注意的一点是，**并不是每次调用Proxy 的静态方法创建动态代理类都会使得 N值增加**，原因：
+        -   是如果对同一组接口（包括接口排列的顺序相同）试图重复创建动态代理类，它会很聪明地返回先前已经创建好的代理类的类对象，而不会再尝试去创建一个全新的代理类，这样可以节省不必要的代码重复生成，提高了代理类的创建效率;
+
+
+
+
+
+**代理类实例的特点**
+
+-   **每个代理实例都会关联一个调用处理器对象Handler**，可以通过 Proxy 提供的静态方法
     getInvocationHandler 去获得代理类实例的调用处理器对象;
--   在代理类实例上调用其代理的接口中所声明的方法时，这些方法最终都会由调用处理器的
-    invoke 方法执行，此外，值得注意的是，委托类的根类 java.lang.Object
-    中有三个方法也同样会被分派到调用处理器的 invoke 方法执行，它们是
-    hashCode，equals 和 toString，可能的原因有：一是因为这些方法为
-    public 且非 final
-    类型，能够被代理类覆盖；二是因为这些方法往往呈现出一个类的某种特征属性，具有一定的区分度，所以为了保证代理类与委托类对外的一致性，这三个方法也应该被分派到委托类执行;
--   当代理的一组接口有重复声明的方法且该方法被调用时，代理类总是从排在最前面的接口中获取方法对象并分派给调用处理器，而无论代理类实例是否正在以该接口（或继承于该接口的某子接口）的形式被外部引用，因为在代理类内部无法区分其当前的被引用类型;
+    
+-   在代理类实例上调用其代理的接口中所声明的方法时，**这些方法最终都会由调用处理器的invoke 方法执行**，此外，值得注意的是，委托类的根类 java.lang.Object中有三个方法也同样会被分派到调用处理器的 invoke 方法执行，它们是hashCode，equals 和 toString，可能的原因有：
+    
+    -   一是：因为这些方法为public 且非 final类型，能够被代理类实现重写；
+    -   二是：因为这些方法往往呈现出一个类的某种特征属性，具有一定的区分度，所以为了保证代理类与委托类对外的一致性，这三个方法也应该被分派到委托类执行;
+    
+- 当代理的一组接口有重复声明的方法且该方法被调用时，代理类总是从排在最前面的接口中获取方法并分派给调用处理器。因为在代理类内部无法区分其当前的被引用类型
 
-被代理的一组接口的特点
+    - ```java
+        interface Subject {
+            void doSomething();
+        }
+        
+        public interface Subject2 {
+            void doSomething();
+        }
+        
+        public class RealSubject implements Subject, Subject2 {
+            @Override
+            public void doSomething() {
+                System.out.println("RealSubject do something");
+            }
+        }
+        ```
+
+
+
+**被代理的一组接口的特点**
 
 -   首先，要注意不能有重复的接口，以避免动态代理类代码生成时的编译错误;
 -   其次，这些接口对于类装载器必须可见，否则类装载器将无法链接它们，将会导致类定义失败;
@@ -122,47 +171,49 @@ jdk动态代理的机制特点
     的接口必须在同一个包中，否则代理类生成也会失败;
 -   最后，接口的数目不能超过 65535，这是 JVM 设定的限制;
 
-异常处理方面的特点
+
+
+**异常处理方面的特点**
 
 -   从调用处理器接口声明的方法中可以看到理论上它能够抛出任何类型的异常，因为所有的异常都继承于
-    Throwable
-    接口，但事实是否如此呢？答案是否定的，原因是我们必须遵守一个继承原则：即子类覆盖父类或实现父接口的方法时，抛出的异常必须在原方法支持的异常列表之内。所以虽然调用处理器理论上讲能够，但实际上往往受限制，除非父接口中的方法支持抛
-    Throwable 异常。那么如果在 invoke
-    方法中的确产生了接口方法声明中不支持的异常，那将如何呢？放心，Java
-    动态代理类已经为我们设计好了解决方法：它将会抛出
-    UndeclaredThrowableException 异常。这个异常是一个 RuntimeException
-    类型，所以不会引起编译错误。通过该异常的 getCause
-    方法，还可以获得原来那个不受支持的异常对象，以便于错误诊断。
+    Throwable接口，但事实是否如此呢？
+-   **答案是否定的**，原因是我们必须遵守一个继承原则：即子类覆盖父类或实现父接口的方法时，**抛出的异常必须在原方法支持的异常列表之内**。所以虽然调用处理器理论上讲能够，但实际上往往受限制，除非父接口中的方法支持抛Throwable 异常。（注意，如果抛出的是RuntimeException，那么无论父接口是否声明了，在调用处理器中都可以抛出RuntimeException异常）
+-   那么如果在 invoke方法中的确产生了接口方法声明中不支持的异常，那将如何呢？放心，Java动态代理类已经为我们设计好了解决方法：它将会抛出UndeclaredThrowableException 异常。这个异常是一个 RuntimeException类型，所以不会引起编译错误。通过该异常的 getCause方法，还可以获得原来那个不受支持的异常对象，以便于错误诊断。
 
-动态代理的优点
 
--   动态代理与静态代理相比较，最大的好处是接口中声明的所有方法都被转移到调用处理器一个集中的方法中处理（InvocationHandler.invoke）。这样，在接口方法数量比较多的时候，我们可以进行灵活处理，而不需要像静态代理那样每一个方法进行中转;
 
-动态代理的不足
+**动态代理的优点**
 
--   诚然，Proxy
-    已经设计得非常优美，但是还是有一点点小小的遗憾之处，那就是它始终无法摆脱仅支持
-    interface
-    代理的桎梏，因为它的设计注定了这个遗憾。回想一下那些动态生成的代理类的继承关系图，它们已经注定有一个共同的父类叫
-    Proxy。Java 的继承机制注定了这些动态代理类们无法实现对 class
-    的动态代理，原因是多继承在 Java 中本质上就行不通。
+-   动态代理与静态代理相比较，最大的好处是接口中声明的所有方法都被转移到调用处理器一个集中的方法中处理（InvocationHandler.invoke）。这样，在接口方法数量比较多的时候，我们可以进行灵活处理，而不需要像静态代理那样每一个方法进行中转
 
-### Cglib
 
-cglib是针对类来实现代理的，基于ASM的包装，他的原理是对指定的目标类生成一个子类，并覆盖其中方法实现增强，但因为采用的是继承，所以不能对final修饰的类进行代理。
 
-cglib 创建某个类A的动态代理类的模式是：
+**动态代理的不足**
 
-1.  查找A上的所有非final 的public类型的方法定义；
+-   诚然，Proxy已经设计得非常优美，但是还是有一点点小小的遗憾之处，那就是它**仅支持
+    接口interface代理**，**因为它的设计注定了这个遗憾**。回想一下那些动态生成的代理类的继承关系图，它们已经注定有一个共同的父类叫Proxy。Java 的继承机制注定了这些动态代理类们无法实现对 class
+    的动态代理，**原因是多继承在 Java 中本质上就行不通**。
 
-2.  将这些方法的定义转换成字节码；
 
-3.  将组成的字节码转换成相应的代理的class对象；
 
-4.  实现 MethodInterceptor接口，用来处理
-    对代理类上所有方法的请求（这个接口和JDK动态代理InvocationHandler的功能和角色是一样的）
 
-差异
+
+### CGLib
+
+**CGLib是针对类来实现代理的**，基于ASM的包装，他的原理是**对指定的目标类生成一个子类，并覆盖其中方法实现增强，但因为采用的是继承，所以不能对final修饰的类进行代理**。
+
+
+
+**CGLib 创建某个类A的动态代理类的流程**
+
+- 查找类A上的所有非final 的public类型的方法定义
+- 将这些方法的定义转换成字节码
+- 将组成的字节码转换成相应的代理的class对象
+- 实现 MethodInterceptor接口，用来处理对代理类上所有方法的请求（这个接口和JDK动态代理InvocationHandler的功能和角色是一样的）
+
+
+
+**差异**
 
 -   JDK动态代理
     -   其代理的对象必须是某个接口的实现，它是通过在运行期间创建一个接口的实现类来完成对目标对象的代理。
@@ -171,30 +222,60 @@ cglib 创建某个类A的动态代理类的模式是：
     -   无法通知（advice）final方法，因为它不能被覆写；
     -   真实对象的引用，可以直接调用，效率更高；
 
-### <h id="1.2.5"/>Javassist
 
-javassist是[jboss](http://baike.baidu.com/view/309533.htm)的一个子项目，其主要的优点，在于简单，而且快速。直接使用java编码的形式，而不需要了解[虚拟机](http://baike.baidu.com/view/1132.htm)指令，就能动态改变类的结构，或者动态生成类。
+
+### Javassist
+
+javassist是[jboss](http://baike.baidu.com/view/309533.htm)的一个子项目，其主要的优点，在于简单，而且快速。**直接使用java编码的形式，来编写类**，而不需要了解[虚拟机](http://baike.baidu.com/view/1132.htm)指令，就能动态改变类的结构，或者动态生成类。
 
 使用Javassist有两种方式来实现动态代理，一种是使用代理工厂创建,和普通的JDK动态代理和CGLIB类似,另一种则可以使用字节码技术创建。
 
-### <h id="1.2.6"/>ASM
+```java
+public class JavassistDemo {
 
-ASM 是一个 Java
-字节码操控框架。它能够以二进制形式修改已有类或者动态生成类。ASM
-可以直接产生二进制 class 文件，也可以在类被加载入 Java
-虚拟机之前动态改变类行为。ASM
-从类文件中读入信息后，能够改变类行为，分析类信息，甚至能够根据用户要求生成新类。
+    public static void main(String[] args) throws Exception {
+        ClassPool pool = ClassPool.getDefault();
+
+        //创建Programmer类
+        CtClass cc= pool.makeClass("com.samples.Programmer");
+
+        //定义code方法
+        CtMethod method = CtNewMethod.make("public void code(){}", cc);
+
+        //插入方法代码
+        method.insertBefore("System.out.println(\"I'm a Programmer,Just Coding.....\");");
+
+        cc.addMethod(method);
+
+        //保存生成的字节码
+        cc.writeFile("/Users/huangyuan/Desktop/Study/code/springDemo/springProvider/src/main/java/com/huang/yuan/dubbo/Javassistaop");
+    }
+
+}
+```
+
+
+
+
+
+### ASM
+
+ASM 是一个 Java字节码操控框架。它能够以二进制形式修改已有类或者动态生成类。
+
+ASM可以直接产生二进制 class 文件，也可以在类被加载入 Java虚拟机之前动态改变类行为。
+
+ASM从类文件中读入信息后，能够改变类行为，分析类信息，甚至能够根据用户要求生成新类。
 
 **不过ASM在创建class字节码的过程中，操纵的级别是底层JVM的汇编指令级别，这要求ASM使用者要对class组织结构和JVM汇编指令有一定的了解。**
 
-### <h id="1.2.7"/>性能比较
+
+
+### 性能比较
 
 ASM \> Javassist Bytecode \> Cglib \> JDK \> Javassist ProxyFactory
 
 -   差异原因
-    -   各方案生成的字节码不一样， 
-        像JDK和CGLIB都考虑了很多因素，以及继承或包装了自己的一些类， 
-        所以生成的字节码非常大，而我们很多时候用不上这些， 而手工生成的字节码非常小，所以速度快。
+    -   各方案生成的字节码不一样， 像JDK和CGLIB都考虑了很多因素，以及继承或包装了自己的一些类， 所以生成的字节码非常大，而我们很多时候用不上这些， 而手工生成的字节码非常小，所以速度快。
 
 
 
@@ -212,9 +293,9 @@ spring开启动态代理的配置
 
 有一个proxy-target-class属性，默认为false
 
-- 当配为<aop:aspectj-autoproxy  poxy-target-class="true"/>时，表示使用CGLib动态代理技术织入增强。
-- 当配为<aop:aspectj-autoproxy  poxy-target-class="false"/>时，表示使用jdk动态代理织入增强
-- 不过即使proxy-target-class设置为false，如果目标类没有声明接口，则spring将自动使用CGLib动态代理。
+- 当配为<aop:aspectj-autoproxy  poxy-target-class="**true**"/>时，**表示使用CGLib动态代理技术织入增强**。
+- 当配为<aop:aspectj-autoproxy  poxy-target-class="**false**"/>时，**表示使用jdk动态代理织入增强**
+- 不过即使proxy-target-class设置为false，**如果目标类没有声明接口，则Spring将自动使用CGLib动态代理**。
 
 
 
@@ -269,6 +350,8 @@ spring开启动态代理的配置
 
 
 
+
+
 ### execution表达式覆盖
 
 ```
@@ -292,9 +375,13 @@ spring开启动态代理的配置
 -   [Java动态代理机制详解（JDK
     和CGLIB，Javassist，ASM）](https://blog.csdn.net/luanlouis/article/details/24589193)
 
-## <h id="1.4"/>附录
+- [Java动态代理分析](https://blog.csdn.net/danchu/article/details/70146985)
 
-### <h id="1.4.1"/>公用类
+
+
+## 附录
+
+### 公用类
 
 ``` {.java}
 package com.github.archerda.designpattern.proxy;
@@ -323,7 +410,9 @@ public class TargetClass {
 }
 ```
 
-### <h id="1.4.2"/>静态代理 demo
+
+
+### 静态代理 demo
 
 ``` {.java}
 package com.github.archerda.designpattern.proxy;
@@ -369,7 +458,9 @@ public class StaticMain {
 }
 ```
 
-### <h id="1.4.3"/>JDK demo
+
+
+### JDK demo
 
 ``` {.java}
 package com.github.archerda.designpattern.proxy;
@@ -467,7 +558,9 @@ public class JdkMain {
 }
 ```
 
-### <h id="1.4.4"/>JDK动态代理字节码源码
+
+
+### JDK动态代理字节码源码
 
 ``` {.java}
 //
@@ -548,7 +641,9 @@ public final class $Proxy0 extends Proxy implements TargetInterface {
 }
 ```
 
-### <h id="1.4.5"/>Cglib demo
+
+
+### Cglib demo
 
 ``` {.java}
 package com.github.archerda.designpattern.proxy;
@@ -628,7 +723,9 @@ public class CglibMain {
 }
 ```
 
-### <h id="1.4.6"/>Cglib动态代理字节码源码
+
+
+### Cglib动态代理字节码源码
 
 ``` {.java}
 //
@@ -1653,7 +1750,9 @@ public class TargetClass$$FastClassByCGLIB$$4e2d847b extends FastClass {
 }
 ```
 
-### <h id="1.4.7"/>Javassist demo
+
+
+###  Javassist demo
 
 ``` {.java}
 package com.github.archerda.designpattern.proxy;
@@ -1851,7 +1950,9 @@ public class JavassistByteCodeMain {
 }
 ```
 
-### <h id="1.4.8"/>Javassist动态代理字节码源码
+
+
+### Javassist动态代理字节码源码
 
 ``` {.java}
 //
@@ -1878,3 +1979,6 @@ public class TargetClassJavassitProxy implements TargetInterface {
 ### 细节点 
 
 service里面调用service，里面的service也会走aop
+
+
+
