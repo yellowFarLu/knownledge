@@ -95,13 +95,21 @@ StandardServer 完成 init 和 start 方法调用后，会一直监听来自8005
 
 ![image-20191008170339243](https://tva1.sinaimg.cn/large/006y8mN6gy1g7qwhlmwt1j30hy0eutb8.jpg)
 
-Servlet 是用 Java 编写的服务器端程序。其主要功能在于交互式地浏览和修改数据，生成动态 Web 内容。其生命周期如下：
+Servlet 生命周期可被定义为从创建直到毁灭的整个过程。以下是 Servlet 遵循的过程：
 
-1. 请求到达 server 端，server 根据 url 映射到相应的 Servlet
-2. 判断 Servlet 实例是否存在，不存在则加载和实例化 Servlet 并调用 init 方法
-3. Server 分别创建 Request 和 Response 对象，调用 Servlet 实例的 service 方法，service 方法 内部会根据 http 请求方法类型调用相应的 doXXX 方法。如doGet、doPost方法。
-4. doXXX 方法内为业务逻辑实现，从 Request 对象获取请求参数，处理完毕之后将结果通过 response 对象返回给调用方
-5. 当 Server 不再需要 Servlet 时(一般当 Server 关闭时)，Server 调用 Servlet 的 destroy() 方 法。
+1.被创建：执行init方法，只执行一次
+
+　　1.1Servlet什么时候被创建？
+
+　　--默认情况下，第一次被访问时，Servlet被创建，然后执行init方法；
+
+　　--可以配置执行Servlet的创建时机；
+
+2.提供服务：执行service方法，执行多次
+
+3.被销毁：当服务器正常关闭时，执行destroy方法，只执行一次
+
+
 
 
 
