@@ -34,21 +34,13 @@ ThreadLocalMap中存放的是Entry，Entry是ThreadLocal和value的映射。
 
 ### 关于内存泄漏
 
-```java
-static class Entry extends WeakReference<ThreadLocal<?>> {
-  /** The value associated with this ThreadLocal. */
-  Object value;
+ThreadLocal在ThreadLocalMap中是以一个弱引用身份被Entry中的Key引用的，因此如果ThreadLocal没有外部强引用来引用它，那么ThreadLocal会在下次JVM垃圾收集时被回收。
 
-  Entry(ThreadLocal<?> k, Object v) {
-    super(k);
-    value = v;
-  }
-}
-```
+这个时候就会出现Entry中Key已经被回收，出现一个null Key的情况，外部读取ThreadLocalMap中的元素是无法通过null Key来找到Value的。因此如果当前线程的生命周期很长，一直存在，那么其内部的ThreadLocalMap对象也一直生存下来，这些null key就存在一条强引用链的关系：Thread --> ThreadLocalMap-->Entry-->Value，这条强引用链会导致Entry不会回收，Value也不会回收，但Entry中的Key却已经被回收的情况，造成内存泄漏。
 
-虽然`Entry`对`ThreadLocal`的引用是弱引用，但是线程的栈中持有对`ThreadLocal`的强引用，而**当对象只存在弱引用时（当然还包括虚引用）**才会被回收，这就存在**OOM**的风险。
+但是JVM团队已经考虑到这样的情况，并做了一些措施来保证ThreadLocal尽量不会内存泄漏：在ThreadLocal的get()、set()、remove()方法调用的时候会清除掉线程ThreadLocalMap中所有Entry中Key为null的Value，并将整个Entry设置为null，利于下次内存回收。
 
-因此需要主动调用`ThreadLocal#remove`方法，清除当前线程的所有键值对，该方法会主动将`Entry`对`ThreadLocal`的弱引用置为**null**，**key**为**null**的`Entry`会被清理。
+
 
 
 
@@ -57,6 +49,8 @@ static class Entry extends WeakReference<ThreadLocal<?>> {
 采用线性探测法来处理冲突，从当前位置往后找寻空位，空位指的是table[ i ] = null 或是 table[ i ] .key = null，将Entry插入该位置。也就是说一个Entry要么在它的hash位置上，要么就在该位置往后的某一位置上。
 
 由于线性探测发 **table** 数组中的情况一定是一段一段连续的片段，我们将一个连续的片段称为 **run**。
+
+
 
 
 
@@ -79,4 +73,20 @@ private static final int HASH_INCREMENT = 0x61c88647;
 所以说 ThreadLocal 也是线程安全的。
 
 
+
+
+
+## 问题
+
+**ThreadLocal时要注意什么？比如说内存泄漏?**
+
+需要主动调用remove()方法释放无用的内存。原因查看上面的内存泄漏
+
+
+
+
+
+## 参考
+
+[ThreadLocal内存泄漏](https://www.jianshu.com/p/a1cd61fa22da)
 

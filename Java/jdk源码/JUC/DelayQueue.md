@@ -1,9 +1,8 @@
 # DelayQueue
 
-延时队列
+延时队列，底层基于优先级队列实现
 
-```
-// 延时队列，底层基于优先级队列实现
+```java
 private final PriorityQueue<E> q = new PriorityQueue<E>();
 ```
 

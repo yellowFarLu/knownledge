@@ -37,7 +37,7 @@ protected final boolean tryAcquire(int acquires) {
   final Thread current = Thread.currentThread();
   int c = getState();
   if (c == 0) {
-    // hasQueuedPredecessors返回true说明前面有比它等更久的线程，你不能插队乖乖排队等待
+    // hasQueuedPredecessors返回true说明前面有比它等更久的线程，你不能插队，需要排队等待
     if (!hasQueuedPredecessors() &&
         compareAndSetState(0, acquires)) {
       setExclusiveOwnerThread(current);
@@ -58,7 +58,7 @@ protected final boolean tryAcquire(int acquires) {
 
 
 
-## 几个lock()方法的区别
+### 几个lock()方法的区别
 
 ```
 * lock、tryLock、lockInterruptibly、tryLock(long time, TimeUnit timeUnit)
@@ -131,6 +131,20 @@ public static void main(String[] args) throws Exception {
         t3.join();
     }
 ```
+
+
+
+
+
+## 问题
+
+
+
+**ReentrantLock如何实现公平和非公平锁？**
+
+在尝试获取的锁的时候，可能有新线程来尝试获取锁，而这个新线程原本不在同步队列中，如果是非公平锁，则允许新线程尝试获取锁，如果是公平锁，则新线程只能插入到条件队列后面，按照FIFO的顺序去获取锁。
+
+
 
 
 

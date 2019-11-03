@@ -124,7 +124,7 @@ HotSpot的作者经研究发现，大多数情况下，锁不仅不存在多线�
 
 #### 偏向锁的撤销
 
-偏向锁的撤销指**线程在获取偏向锁的时候失败了，导致要将锁对象改为非偏向锁状态**
+偏向锁的撤销指**线程在获取偏向锁的时候失败了，导致要将锁对象改为非偏向锁状态，升级为轻量级锁**
 
 - 会在`safepoint`中去查看偏向的线程是否还存活
   - 如果存活且还在同步块中则将锁升级为轻量级锁，原偏向的线程继续拥有锁，当前线程则走入到锁升级的逻辑里（当先线程会尝试获取轻量级锁，如果获取不成功，就只能获取重量级锁导致阻塞）
@@ -248,6 +248,18 @@ HotSpot的作者经研究发现，大多数情况下，锁不仅不存在多线�
 
 
 
+## ReentrantLock的区别
+
+- ReentrantLock支持等待超时，可以有效避免死锁
+- ReentrantLock支持中断
+- ReentrantLock支持公平锁，也就是按照FIFO的顺序获取锁
+- ReentrantLock支持绑定Condition对象
+- 在资源竞争不是很激烈的情况下，synchronize使用的是偏向锁，效率较高。而ReentrantLock总是会阻塞线程。
+
+
+
+
+
 ## 总结
 
 Java虚拟机中synchronized关键字的实现，按照代价由高到低可以分为重量级锁、轻量锁和偏向锁三种。
@@ -269,3 +281,6 @@ Java虚拟机中synchronized关键字的实现，按照代价由高到低可以�
 [死磕Synchronized底层实现--概论](https://www.jianshu.com/p/e2054351bd95)
 
 [死磕Synchronized底层实现--偏向锁](https://www.jianshu.com/p/4758852cbff4)
+
+[synchronzied和ReentrantLock区别](https://www.cnblogs.com/shoshana-kong/p/10876982.html)
+

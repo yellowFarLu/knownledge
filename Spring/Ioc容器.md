@@ -13,7 +13,7 @@
 ## IoC容器初始化过程
 
 - **资源定位，资源解析**
-   
+  
    - 找到资源文件，载入。
    - 把资源文件转化成DOM元素
    - 这个资源一般指的是配置文件
@@ -149,30 +149,27 @@ ContextLoaderListener 实现了 javax.servlet.ServletContextListener，这个是
 
 
 
-- **调用构造器初始化**
-- 调用InstantiationAwareBeanPostProcessor#postProcessPropertyValues
-- **进行依赖注入 **
-- org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#populateBean
+- **构造器初始化**
+- **设置Bean的属性**
+  - **进行依赖注入 **
+  - org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#populateBean
   - 触发@Autowired/@Value/@Inject 依赖注入
   - 触发@Resouce的依赖注入 
   - 真正进行注入org.springframework.context.annotation.CommonAnnotationBeanPostProcessor
 
-会触发getBeanName
-
-- BeanNameAware#setBeanName  让实现这个接口的bean **可以获取到自己在spring容器里的名字**
+- **BeanNameAware#setBeanName ** 让实现这个接口的bean 可以获取到自己在spring容器里的名字
   - org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#initializeBean
-
-- BeanFactoryAware#setBeanFactory 
+- **BeanFactoryAware#setBeanFactory **
   - 通过该方法可以获取容器，因此可以做到通过容器获取bean
-
-- BeanPostProcessor#postProcessBeforeInitialization
-- @PostConstruct  
+- **BeanPostProcessor#postProcessBeforeInitialization**
+- **@PostConstruct **
   - @PostConstruct注解的方法将会在依赖注入完成后被自动调用
   - @PostConstruct修饰的方法在构造函数之后执行，在init-method设置的方法之前执行
-- InitializingBean#afterPropertiesSet
+- **InitializingBean#afterPropertiesSet**
   - 也是扩展的一种，可以针对bean做配置
-- 自定义init-method（通过在bean标签的init-method方法定义）
-- BeanPostProcessor#postProcessAfterInitialization
+- **初始化方法init-method**
+  - 通过在bean标签的init-method方法定义
+- **BeanPostProcessor#postProcessAfterInitialization**
 
 **这样子bean就初始化好了**
 
@@ -180,13 +177,11 @@ ContextLoaderListener 实现了 javax.servlet.ServletContextListener，这个是
 
 **当容器停止的时候，依次调用**
 
-1. @PreDestroy
-
-   @PreDestroy修饰的方法在被bean被销毁之前执行
-
-2. DisposableBean#destroy
-
-3. destory-method
+- **@PreDestroy**
+  - @PreDestroy修饰的方法在被bean被销毁之前执行
+- **DisposableBean#destroy**
+- **销毁方法destory-method**
+  - 通过bean配置定义
 
 
 

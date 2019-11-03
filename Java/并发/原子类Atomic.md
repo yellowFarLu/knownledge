@@ -2,6 +2,18 @@
 
 
 
+原子类都是基于CAS实现的，使用CAS实现乐观锁，保证内存可见性及并发更新问题。
+
+
+
+## AtomicInteger
+
+
+
+
+
+
+
 ## AtomicReference
 
 AtomicReference可以保证你在修改对象引用时的线程安全性。也就是读-改-写对象引用是原子的。

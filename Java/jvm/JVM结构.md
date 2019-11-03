@@ -135,11 +135,43 @@ Java虚拟机栈也是线程私有的。它的生命周期与线程相同。
 
 ### 直接内存
 
-直接内存并不是虚拟机运行时数据区的一部分，也不是Java 虚拟机规范中农定义的内存区域。在JDK1.4 中新加入了NIO(New Input/Output)类，引入了一种基于通道(Channel)与缓冲区（Buffer）的I/O 方式，它可以使用native 函数库直接分配堆外内存，然后通脱一个存储在Java堆中的DirectByteBuffer 对象作为这块内存的引用进行操作。这样能在一些场景中显著提高性能，因为避免了在Java堆和Native堆中来回复制数据。
+直接内存（堆外内存）并不是虚拟机运行时数据区的一部分，也不是Java 虚拟机规范中农定义的内存区域。
+
+在JDK1.4 中新加入了NIO(New Input/Output)类，引入了一种基于通道(Channel)与缓冲区（Buffer）的I/O 方式，它可以使用native 函数库直接分配堆外内存，然后通脱一个存储在Java堆中的DirectByteBuffer 对象作为这块内存的引用进行操作。这样能在一些场景中显著提高性能，**因为避免了在Java堆和Native堆中来回复制数据**。
 
 本机直接内存的分配不会受到Java 堆大小的限制，受到本机总内存大小限制，JVM中有参数可以限制直接内存的大小（-XX MaxDirectMemorySize）。
 
-配置虚拟机参数时，不要忽略直接内存 防止出现OutOfMemoryError异常
+配置虚拟机参数时，不要忽略直接内存，防止出现OutOfMemoryError异常。
+
+Ecache就是使用堆外内存实现的。
+
+
+
+#### 堆外内存的回收
+
+JDK中使用`DirectByteBuffer`对象来表示堆外内存，每个`DirectByteBuffer`对象在初始化时，都会创建一个对用的`Cleaner`对象，这个`Cleaner`对象会在合适的时候执行`unsafe.freeMemory(address)`，从而回收这块堆外内存。
+
+当初始化一块堆外内存时，对象的引用关系如下：
+
+![image-20191103183537170](https://tva1.sinaimg.cn/large/006y8mN6gy1g8l199azhyj31120c6n01.jpg)
+
+`ReferenceQueue`是用来保存需要回收的`Cleaner`对象。
+
+如果该`DirectByteBuffer`对象在一次GC中被回收了
+
+![image-20191103183617388](https://tva1.sinaimg.cn/large/006y8mN6gy1g8l19ymo8qj311u0bmjtm.jpg)
+
+在GC时，把该`Cleaner`对象放入到`ReferenceQueue`中，并触发`clean`方法。
+
+`Cleaner`对象的`clean`方法主要有两个作用：
+1、把自身从`Clener`链表删除，从而在下次GC时能够被回收
+2、释放堆外内存
+
+如果JVM一直没有执行FGC的话，无效的`Cleaner`对象就无法放入到ReferenceQueue中，从而堆外内存也一直得不到释放，内存岂不是会爆？
+
+其实在初始化`DirectByteBuffer`对象时，如果当前堆外内存的条件很苛刻时，会主动调用`System.gc()`强制执行FGC。
+
+
 
 
 
@@ -330,4 +362,20 @@ Java程序需要通过**栈上的引用**来操作堆上的具体对象。目前
 
 
 
+
+## 问题
+
+**什么情况下使用堆外内存，需要注意什么？**
+
+当需要使用大块内存空间作为缓存的时间，如果使用堆内存，会给GC带来压力。这时候就可以使用堆外内存（直接内存）。
+
+使用堆外内存的时候，一定要配置虚拟机参数来限制堆外内存的大小，避免内存溢出。
+
+
+
+## 参考
+
+[堆外内存](https://www.jianshu.com/p/17e72bb01bf1)
+
+[堆外内存的回收](https://www.jianshu.com/p/35cf0f348275)
 

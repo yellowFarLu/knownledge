@@ -1,4 +1,4 @@
-#深入理解动态代理
+# 深入理解动态代理
 
 
 
@@ -26,7 +26,7 @@
 
 -   **程序运行前就已经存在代理类的字节码文件**，代理类和委托类的关系在运行前就已经确定了;
 -   优点
-    
+  
     -   业务类只需要关注业务逻辑本身，保证了业务类的重用性
 -   缺点
     - **代理对象只服务于一种类型的对象**，如果要代理的对象很多，势必要为每一种对象都进行代理，静态代理在程序规模稍大时就无法胜任了
@@ -112,7 +112,7 @@ public static Object newProxyInstance(ClassLoader loader,Class<?>[] interfaces,I
 **Jdk动态代理的机制特点**
 
 -   包：
-    
+  
     -   如果所代理的接口interface都是 public的，那么它将被定义在顶层包（即包路径为空）
     -   如果所代理的接口中有非public 的接口，那么它将被定义在该接口所在包。（**保证代理类能够访问被代理类**）
     
@@ -120,11 +120,11 @@ public static Object newProxyInstance(ClassLoader loader,Class<?>[] interfaces,I
     com.ibm.developerworks），这样设计的目的是**为了最大程度的保证动态代理类不会因为包管理的问题而无法被成功定义并访问**
     
 -   类修饰符：
-    
+  
     -   代理类具有 final 和 public修饰符，意味着**代理类可以被所有的类访问，但是不能被再度继承**；
     
 -   类名：
-    
+  
     -   格式是"\$ProxyN"，其中 N 是一个逐一递增的阿拉伯数字，代表Proxy 类第 N 次生成的动态代理类。值得注意的一点是，**并不是每次调用Proxy 的静态方法创建动态代理类都会使得 N值增加**，原因：
         -   是如果对同一组接口（包括接口排列的顺序相同）试图重复创建动态代理类，它会很聪明地返回先前已经创建好的代理类的类对象，而不会再尝试去创建一个全新的代理类，这样可以节省不必要的代码重复生成，提高了代理类的创建效率;
 
@@ -138,7 +138,7 @@ public static Object newProxyInstance(ClassLoader loader,Class<?>[] interfaces,I
     getInvocationHandler 去获得代理类实例的调用处理器对象;
     
 -   在代理类实例上调用其代理的接口中所声明的方法时，**这些方法最终都会由调用处理器的invoke 方法执行**，此外，值得注意的是，委托类的根类 java.lang.Object中有三个方法也同样会被分派到调用处理器的 invoke 方法执行，它们是hashCode，equals 和 toString，可能的原因有：
-    
+  
     -   一是：因为这些方法为public 且非 final类型，能够被代理类实现重写；
     -   二是：因为这些方法往往呈现出一个类的某种特征属性，具有一定的区分度，所以为了保证代理类与委托类对外的一致性，这三个方法也应该被分派到委托类执行;
     
@@ -202,6 +202,8 @@ public static Object newProxyInstance(ClassLoader loader,Class<?>[] interfaces,I
 
 **CGLib是针对类来实现代理的**，基于ASM的包装，他的原理是**对指定的目标类生成一个子类，并覆盖其中方法实现增强，但因为采用的是继承，所以不能对final修饰的类进行代理**。
 
+GClib也可以为接口创建动态代理类，是生成一个代理类实现该接口的方法，参考[CGlib实现代理](https://blog.csdn.net/starryninglong/article/details/89737419#jdk_1)
+
 
 
 **CGLib 创建某个类A的动态代理类的流程**
@@ -213,14 +215,18 @@ public static Object newProxyInstance(ClassLoader loader,Class<?>[] interfaces,I
 
 
 
+
+
 **差异**
 
 -   JDK动态代理
-    -   其代理的对象必须是某个接口的实现，它是通过在运行期间创建一个接口的实现类来完成对目标对象的代理。
-    -   通过反射来实现对目标方法的调用，效率低一些；
--   CGLIG动态代理
-    -   无法通知（advice）final方法，因为它不能被覆写；
-    -   真实对象的引用，可以直接调用，效率更高；
+    -   **其代理的对象必须是某个接口的实现**，它是通过在运行期间创建一个接口的实现类来完成对目标对象的代理。
+    -   **通过反射来实现对目标方法的调用，效率低一些**
+-   CGLib动态代理
+    -   **无法代理final方法，因为它不能被覆写**
+    -   **持有真实被代理对象的引用，可以直接调用，效率更高**
+
+
 
 
 
