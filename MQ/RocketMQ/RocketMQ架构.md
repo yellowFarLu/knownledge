@@ -155,3 +155,7 @@ Producer启动时，也需要指定Nameserver的地址，从Nameserver集群中�
 
 《RocketMQ实战与原理解析》
 
+[RocketMQ原理之Producer](https://blog.csdn.net/qq_34622600/article/details/79139105)
+
+[RocketMQ原理之Consumer](https://blog.csdn.net/qq_34622600/article/details/79139312)
+
