@@ -1,8 +1,4 @@
-# IO及NIO
-
-
-
-## NIO
+# NIO
 
 NIO 实现了 IO 多路复用中的 Reactor 模型。
 
@@ -69,20 +65,7 @@ I/O 包和 NIO 已经很好地集成了，java.io.* 已经以 NIO 为基础重�
 
 
 
-## IO
 
-阻塞IO，Java I/O 使用了装饰者模式来实现。
-
-
-
-
-
-
-
-## BIO NIO区别
-
-- BIO是阻塞的，NIO是非阻塞的
-- IO面向流，NIO面向块（ByteBuffer）传输。
 
 
 

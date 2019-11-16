@@ -210,6 +210,87 @@ public class ReorderExample {
 
 
 
+## 锁的内存语义
+
+
+
+### 锁的获取释放 建立的happen-before关系
+
+锁除了让临界区互斥执行外，还可以让释放锁的线程 向 获取同一个锁的线程发送消息。
+
+看下面代码实例：
+
+![image-20191116171802182](https://tva1.sinaimg.cn/large/006y8mN6gy1g9002jyuplj30t00cymy9.jpg)
+
+假设线程A执行writer()方法，随后线程B执行reader()方法。根据happen-before规则，这个过程包含的happen-before关系可以分为3类：
+
+- 根据程序顺序规则，1happen-before2，2happen-before3。  4happen-before5，5happen-before6
+- 根据监视器规则，3happen-before4
+- 根据happen-before的传递性：2happen-before5
+
+
+
+### 锁的获取与释放的内存语义
+
+当释放锁时，JMM会把该线程的本地内存的共享变量刷到主内存中。以上面MonitorExample为例，A释放锁后，共享数据的状态如下：
+
+![image-20191116182014490](https://tva1.sinaimg.cn/large/006y8mN6gy1g901v8yk2jj30z50u0dj6.jpg)
+
+当线程获取锁时，JMM会把该线程对应的本地内存置为无效。从而使被监视器保护的临界区代码必须从主内存中读取共享变量。如下：
+
+![image-20191116182209653](https://tva1.sinaimg.cn/large/006y8mN6gy1g901x8nb73j311q0u0jwv.jpg)
+
+锁的释放与volatile写有相同的内存语义；锁的获取与volatile读有相同的内存语义。
+
+线程A释放锁，随后线程B获取锁，这个过程实际上是线程A通过主内存向线程B发送消息。
+
+
+
+
+
+### 锁内存语义的实现
+
+借ReentrantLock的代码，来分析锁内存语义的具体实现机制。
+
+ReentrantLock分为公平锁和非公平锁。
+
+公平锁在释放锁的最后写volatile变量state，在获取锁时首先读这个volatile变量。根据volatile的happen-before规则，释放锁的线程在写volatile变量之前的可见的共享变量，在获取锁的线程读取**同一个volatile变量**之后，将立即对获取锁的线程可见。
+
+非公平锁获取时，首先会用CAS更新volatile变量的值。
+
+锁的释放-获取的内存语义，至少有2种实现方式：
+
+- 利用volatile变量写-读的内存语义
+- 利用CAS附带的volatile读和volatile写的内存语义
+
+
+
+### concurrent包的实现
+
+由于CAS同时具有volatile读和volatile写的内存语义，因此Java线程之间的通讯现在有了下面4种方式：
+
+- A线程写volatile变量，随后B线程读这个volatile变量
+- A线程写volatile变量，随后B线程使用CAS更新这个volatile变量
+- A线程用CAS更新一个volatile变量，随后B线程用CAS更新这个volatile变量
+- A线程用CAS更新一个volatile变量，随后B线程读这个volatile变量
+
+如果我们仔细分析concurrent包的源码实现，会发现一个通用化的实现模式：
+
+- 首先，声明变量为volatile
+- 然后，使用CAS原子更新实现线程之前的同步
+  - 使用CAS实现乐观锁，可以实现复合操作的原子性，保证线程安全
+- 同时，以volatile变量的读写 和  CAS所具有的volatile读写内存语义 来实现线程之间的通讯
+
+
+
+AQS、原子变量类，这些concurrent包中的基础类都是这种模式实现的，而concurrent包中的高层类又依赖于这些基础类来实现，从整体看：
+
+![image-20191116185856617](https://tva1.sinaimg.cn/large/006y8mN6gy1g902zj2v3wj31260u0dlb.jpg)
+
+
+
+
+
 
 
 

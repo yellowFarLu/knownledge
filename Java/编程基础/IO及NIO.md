@@ -41,6 +41,22 @@ class DirFilter implements FilenameFilter {
 
 
 
+# IO及NIO
+
+
+
+## IO及NIO的区别
+
+- IO是阻塞的，NIO是非阻塞的
+- IO面向流，NIO面向块（ByteBuffer）传输
+- NIO使用多路复用实现
+
+（**IO也就是BIO**）
+
+
+
+
+
 ## 获取路径的方法
 
 ```java
@@ -126,26 +142,6 @@ OutputStream决定了输出所要去的目标：字节数组、文件或管道�
 ![Snip20190421_2](https://ws2.sinaimg.cn/large/006tNc79gy1g2a47owf7aj31c40s4gye.jpg)
 
 所有输出有关的类都继承自OutputStream
-
-
-
-##装饰器公共接口
-
-FilterInputStream和FilterOutputStream是用来提供装饰器类接口以控制特定输入流（InputStream）和输出流（OutputStream）的两个类。所有装饰器都必须实现FilterInputStream或者FilterOutputStream。
-
-
-
-###FilterInputStream
-
-![image-20190421120348826](https://ws2.sinaimg.cn/large/006tNc79gy1g2a4h6aeu9j31ca0s2qgq.jpg)
-
-
-
-### FilterOutputStream
-
-![image-20190421120553005](https://ws3.sinaimg.cn/large/006tNc79gy1g2a4jc22hdj31aw0nak3h.jpg)
-
-
 
 
 
