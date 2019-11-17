@@ -1,59 +1,108 @@
-#Thread
+# Java线程
+
+现在操作系统在运行一个程序时，会创建一个进程。现代操作系统调度的最小单位是线程，也叫轻量级线程。在一个进程里可以创建多个线程，这些线程有各自的计数器、堆栈、局部变量等属性，并且能够访问共享的内存变量。处理器在这些线程上高速切换，让使用者感觉到这些线程在同时执行。
+
+
+
+一个Java程序从Main()方法开始执行，看似没有其他线程的参与，实际上任何一个java程序都是多线程执行的，如下，打印出最简单的main()方法的每条线程信息：
+
+```java
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
+
+/**
+ * @author huangy on 2019-11-17
+ */
+public class MultiThread {
+
+    public static void main(String[] args) {
+        ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
+
+        ThreadInfo[] threadInfos = threadMXBean.dumpAllThreads(false, false);
+
+        for (ThreadInfo threadInfo : threadInfos) {
+            System.out.println(threadInfo.getThreadId() + "      " + threadInfo.getThreadName());
+        }
+    }
+
+}
+
+输出
+7      JDWP Command Reader
+6      JDWP Event Helper Thread
+5      JDWP Transport Listener: dt_socket
+4      Signal Dispatcher
+3      Finalizer
+2      Reference Handler
+1      main  
+```
+
+可以看到，一个Java程序的运行不仅仅是main()的运行，而是main()线程和其他多个线程一起运行。
+
+
 
 
 
 ## 线程状态
 
-线程可以处于以下5个状态之一：
+线程可以处于以下6个状态之一，在给定的某一时刻，线程只能处于其中一个状态：
 
-###新建
-
-当线程被初始化时，它只会短暂的处于这个状态。此时它已经分配了必需的系统资源，并执行了初始化。
-
-
-
-### 就绪
-
-在这种状态下，只要调度器把时间片分给线程，线程就可以运行。
+- new：初始状态。线程被构建，但是还没有调用start()方法
+- runnable：运行状态。
+  - Java线程将操作系统中的“就绪“和”运行“两种状态统称为”运行状态“
+- blocked：阻塞状态。表示线程阻塞于锁
+- waiting：等待状态。表示线程进入等待状态，进入该状态表示当前线程需要等待其他线程做出一些特定动作，比如通知或中断
+- time_waiting：超时等待状态。该状态不同于waiting，它可以在指定的时间自行返回
+- terminated：终止状态。表示当前线程已经执行完毕
 
 
 
-### 运行
+线程在自身的生命周期中，并不是固定的处于某个状态，而是随着代码执行在不同状态之间切换。java线程状态变迁如下图：
 
-线程得到CPU时间片，那么就可以执行程序代码。这时候就是运行状态
+![image-20191117224055277](https://tva1.sinaimg.cn/large/006y8mN6gy1g91f0t0084j31610u0wvy.jpg)
 
+由上图可以看到：
 
-
-### 阻塞
-
-线程能够运行，但是某个条件阻止它的运行。当线程处于阻塞状态时，调度器将忽略线程，不会分配给线程任何CPU时间，直到线程重新进入就绪状态。
-
-
-
-#### 阻塞状态的原因
-
-- 调用sleep使线程阻塞，线程在指定时间内不会运行
-- 调用wait()方法阻塞
-- 任务等待输入/输出
-- 同步等待(等待锁)
+- 线程创建之后，调用start()方法开始运行
+- 当线程执行wait()方法之后，线程进入阻塞状态。
+  - 进入阻塞状态的线程需要依赖其他线程的通知才能重新进入运行状态
+- 超时等待状态相当于等待状态的基础上增加了超时机制，到达了超时时间自动返回运行状态
+- 当线程调用同步方法没有获取到锁，线程将会进入到阻塞状态
+- 线程执行完Runnable的run()方法之后，将会进入终止状态
+- 阻塞状态是进入synchronize修饰的代码块时线程阻塞的状态。但是阻塞在concurrent包中Lock接口的线程却是等待状态，因为Lock接口的实现均使用了LockSupport的方法，这些方法将线程挂起/唤醒。
 
 
 
+## 守护线程
+
+守护线程（Daemon线程）是一种支持型线程，因为它主要用于后台调度以及支持性工作。
+
+当JVM中不存在非Daemon线程，JVM将会退出。
+
+可以通过Thread.setDaemon(true)设置线程为守护线程。注意，只能在线程启动前设置，不能在线程启动之后设置。
+
+在JVM退出时，Daemon线程中finally块不一定会执行。因此，在Daemon线程中不能依赖finally块来释放资源。
 
 
-### 死亡
 
-处于死亡状态的线程，将不再是可调度的，并且再也不会得到CPU时间。任务死亡的方式通常是从run()方法返回，但是任务的线程还可以被中断。
-
+## 启动或终止线程
 
 
-## init()
+
+
+
+
+
+## Thread类的方法
+
+### init()
 
 在该方法中，调用者线程将作为父线程，新创建的线程继承父线程的部分属性，设置当前线程执行的任务，当前线程的线程ID等属性。
 
 
 
-## start()
+### start()
 
 start()方法会让当前线程从新建状态进入就绪状态，通过调用本地方法实现。
 
@@ -61,7 +110,7 @@ start()方法会让当前线程从新建状态进入就绪状态，通过调用�
 
 
 
-##yield()
+### yield()
 
 Java线程中的Thread.yield( )方法，译为线程让步。顾名思义，就是说当一个线程使用了这个方法之后，它就会把自己CPU执行的时间让掉，
 
@@ -79,7 +128,7 @@ yield()的作用是让步。它能让当前线程由“运行状态”进入到�
 
 
 
-##sleep()
+### sleep()
 
 Thread.sleep(long millis)方法，让线程休眠一段时间，**使线程转到阻塞状态**。millis参数设定睡眠的时间，以毫秒为单位。**当睡眠结束后，就转为就绪（Runnable）状态**。sleep()平台移植性好。sleep() 可能会抛出 InterruptedException。因为异常不能跨线程传播回 main() 中，因此必须在本地进行处理。线程中抛出的其它异常也同样需要在本地进行处理。
 
@@ -87,7 +136,7 @@ Thread.sleep(long millis)方法，让线程休眠一段时间，**使线程转�
 
 
 
-###sleep和wait的区别
+#### sleep和wait的区别
 
 - sleep属于Thread类，wait()方法属于Object类
 
@@ -103,7 +152,7 @@ Thread.sleep(long millis)方法，让线程休眠一段时间，**使线程转�
 
 
 
-##join()
+### join()
 
 概念：join()方法的作用，是等待这个线程结束。t.join()方法阻塞调用此方法的线程(calling thread)，此线程将被挂起，直到线程t完成，此线程再继续
 
@@ -179,7 +228,7 @@ joinerTwo Joiner awake
 
 
 
-## interrupted()
+### interrupted()
 
 interrupt()方法是中断当前的线程（设置中断标志位）。
 
@@ -206,7 +255,13 @@ interrupt()方法是中断当前的线程（设置中断标志位）。
 
 ##优先级
 
-给线程设置优先级，调度器倾向于让优先级高的线程先执行。优先级低的线程也会得到执行，因此，优先权不会导致死锁，优先级较低的线程，仅仅是执行的频率较低。
+给线程设置优先级，调度器倾向于让优先级高的线程先执行。（优先级高的线程得到更多的CPU时间片）
+
+优先级低的线程也会得到执行，因此，优先权不会导致死锁，优先级较低的线程，仅仅是执行的频率较低。
+
+线程优先级不能作为程序正确性的依赖，因为操作系统可以完全不理会Java线程对于优先级的设定。
+
+
 
 
 
