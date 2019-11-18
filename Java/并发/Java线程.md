@@ -88,6 +88,44 @@ public class MultiThread {
 
 ## 启动或终止线程
 
+### 构造线程
+
+在运行线程之前，首先要构造一个线程对象。线程对象在构造时需要提供线程所需要的属性，如线程所属的线程组、线程优先级、是否守护线程等信息。
+
+一个新构造的线程对象是由其父线程来进行空间分配的，而子线程继承了父线程是否守护线程、优先级等属性。
+
+至此一个可运行的线程就对象就初始化好了，在堆内存中等待着运行。
+
+
+
+### 启动线程
+
+线程对象在初始化完成后，调用start()方法可以启动这个线程。
+
+start()方法的含义是：当前线程（即父线程）同步告诉JVM，只要线程规划器空闲，就应立即启动 调用了start()方法 的线程。
+
+这个过程其实就是让系统安排一个时间来调用 Thread 中的 run() 方法，也就是使线程得到运行。
+
+多线程是异步的，线程在代码中启动的顺序不是线程被调用的顺序。
+
+
+
+### 理解中断
+
+中断可以理解为一个线程的标志位属性，它表示一个运行中的线程是否被其他线程进行了中断操作。
+
+中断好比其他线程向该线程打了个招呼，其他线程通过调用该线程的Interrupt()方法对其进行中断操作。
+
+线程通过检查自身是否被中断来进行响应，线程可以通过isInterrupted()来判断是否被中断，也可以调用Thread.interrupted()对当前线程的中断标示位进行复位。如果该线程已经是终止状态，即时对该线程进行中断，该线程的isInterrupted()方法依旧会返回false。
+
+当方法抛出InterruptedException之前，JVM会先将该线程的中断标志位复位（也就是改为false），然后抛出InterruptedException，此时调用isInterrupted()会返回false。
+
+
+
+sleep阻塞 能够中断；IO阻塞不可以中断； 等待锁的阻塞不可以中断；非阻塞不可以中断
+
+
+
 
 
 
@@ -228,7 +266,7 @@ joinerTwo Joiner awake
 
 
 
-### interrupted()
+### interrupt()
 
 interrupt()方法是中断当前的线程（设置中断标志位）。
 
@@ -296,3 +334,6 @@ https://www.cnblogs.com/xrq730/p/4856072.html  (貌似不推荐使用线程组�
 https://blog.csdn.net/u014634338/article/details/78995645
 
 https://blog.csdn.net/u014634338/article/details/77844521
+
+[多线程编程核心技术](https://www.infoq.cn/article/Jtv2XL3a0HvRE2xwrNFs)
+
