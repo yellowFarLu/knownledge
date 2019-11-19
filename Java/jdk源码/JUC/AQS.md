@@ -69,7 +69,9 @@ AQS中使用的是CLH队列：CLH同步队列是一个FIFO双向队列，AQS依�
 
 
 
-###acquire
+### 获取排他锁
+
+#### acquire
 
 ```java
 public final void acquire(int arg) {
@@ -84,7 +86,7 @@ public final void acquire(int arg) {
 
 
 
-###release
+#### release
 
 之前获取锁的线程执行完了，释放同步状态，唤醒同步队列中的队列头结点的后继线程，后继线程再次尝试获取同步状态。
 
@@ -101,6 +103,14 @@ A线程tryAcquire失败，addWaiter创建了一个空的Node作为Head，它的n
 若失败tryAcquire则调用shouldParkAfterFailedAcquire，此时将头Head的同步状态由0变为SIGNAL返回false，回到acquireQueued里再次循环，还是尝试再次tryAcquire，失败调用shouldParkAfterFailedAcquire，由于Head的waitStatus为SIGNAL返回true，进入parkAndCheckInterrupt，将A线程阻塞；若又一线程B也失败，它将会将A 的waitStatus变为SIGNAL，排在A的后面阻塞着；
 
 执行的线程完成了，release释放同步状态，唤醒同步队列里的线程；接着上面的逻辑，首先N线程tryRelease成功，取出head节点执行unparkSuccessor，将head节点waitStatus重置为0，取出head.next也就是A，LockSupport.unpark唤醒A线程，逻辑回到了A阻塞的地方也就是acquireQueued的for循环里，再次尝试tryAcquire（在这里可能被插队），成功，将A设为head，将原先为空的head的next指针清除以便GC回收；
+
+
+
+
+
+### 获取共享锁
+
+
 
 
 
