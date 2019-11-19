@@ -69,7 +69,7 @@ AQS中使用的是CLH队列：CLH同步队列是一个FIFO双向队列，AQS依�
 
 
 
-### 获取排他锁
+### 独占锁
 
 #### acquire
 
@@ -108,7 +108,21 @@ A线程tryAcquire失败，addWaiter创建了一个空的Node作为Head，它的n
 
 
 
-### 获取共享锁
+### 共享锁
+
+共享式和独占式最主要的区别是：同一时刻能否有多个线程能获取到同步状态。
+
+![image-20191120001122331](https://tva1.sinaimg.cn/large/006y8mN6gy1g93svj4kzej31840seqey.jpg)
+
+#### acquireShare
+
+acquireShare中会调用tryAcquireShare()，返回值大于等于0，则表示能获取到同步状态，线程会自旋直到成功获取同步状态，当然获取同步状态失败也会挂起。
+
+
+
+#### releaseShare
+
+释放同步状态，并且唤醒后面的线程。释放同步状态有可能由多个线程同时进行，一般使用循环和CAS保证同步状态线程安全地释放。
 
 
 
