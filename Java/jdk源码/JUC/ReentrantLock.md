@@ -58,6 +58,12 @@ protected final boolean tryAcquire(int acquires) {
 
 
 
+#### 区别
+
+非公平锁可能导致导致饥饿。但是非公平锁的效率更高，能够减少线程上下文切换。
+
+
+
 ### 几个lock()方法的区别
 
 ```
