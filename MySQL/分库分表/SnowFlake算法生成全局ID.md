@@ -67,4 +67,9 @@ SnowFlake算法在同一毫秒内最多可以生成多少个全局唯一ID呢？
 
 
 
-参考：[SnowFlake算法生成全局ID](https://blog.csdn.net/bjweimengshu/article/details/80162731)
+## 参考
+
+[SnowFlake算法生成全局ID](https://blog.csdn.net/bjweimengshu/article/details/80162731)
+
+[雪花算法的Java实现](https://blog.csdn.net/lq18050010830/article/details/89845790)
+
