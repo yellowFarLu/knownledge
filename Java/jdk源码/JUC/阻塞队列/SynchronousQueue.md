@@ -1,5 +1,7 @@
 # SynchronousQueue
 
+SynchronousQueue像一个传球手，负责把生成者的数据直接传递给消费者，列表本身不存储任何元素，非常适合传递性场景。
+
 
 
 ## 原理

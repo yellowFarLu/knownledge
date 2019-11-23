@@ -10,6 +10,8 @@ private final PriorityQueue<E> q = new PriorityQueue<E>();
 
 如果你的比较规则是到期时间，那么堆顶就是最快到期的，如果不是那么堆顶就可能不是最快到期的，也就是堆里可能存在已到期的对象。
 
+是一个无界阻塞队列。
+
 
 
 ## take()
@@ -26,7 +28,7 @@ private final PriorityQueue<E> q = new PriorityQueue<E>();
 
 ## leader节点的作用
 
-是为了尽量减少锁竞争。
+**是为了尽量减少锁竞争**。如果leader不为空，表明前面已经有线程尝试去获取元素，并且还没有获取成功，在阻塞着。那么当前线程也就进入阻塞状态，不要去参与锁的竞争。
 
 参考下面代码：
 
@@ -36,7 +38,14 @@ if (leader != null)
   available.await();
 ```
 
-如果leader不为空，表明前面已经有线程去尝试获取元素，并且还没有获取成功，在阻塞着。那么当前线程也就进入阻塞状态，不要去参与锁的竞争。
+
+
+## 应用场景
+
+- 缓存系统设计
+  - 可以用DelayQueue保存元素的有效期，然后使用一条线程调用DelayQueue的take()方法，如果元素出队了，证明该元素到期了，那么就可以从缓存中删除该元素。
+- 定时任务
+  - 使用DelayQueue保存将执行的任务和执行时间，一旦时间到了，就从DelayQueue中获取到元素，就可以开始执行任务。TimerQueue就是使用DelayQueue实现的。
 
 
 

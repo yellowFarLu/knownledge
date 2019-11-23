@@ -133,3 +133,6 @@ Binding表可理解为分库分表规则完全一致的主从表。举例说明�
 http://www.uml.org.cn/sjjm/2016021710.asp
 
 https://blog.csdn.net/dy_f/article/details/84911733
+
+[分库分表limit实现](https://cloud.tencent.com/developer/article/1464281)
+

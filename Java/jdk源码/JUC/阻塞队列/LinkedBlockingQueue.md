@@ -1,5 +1,7 @@
 # LinkedBlockingQueue
 
+Java阻塞队列的一种实现方式。
+
 
 
 ## 两把锁实现
