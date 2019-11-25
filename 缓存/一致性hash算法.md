@@ -10,3 +10,11 @@
 
 ![引子](https://ws2.sinaimg.cn/large/006tNc79gy1fyws2wxp8pj307l0f574s.jpg)
 
+
+
+
+
+## 参考
+
+[一致性hash算法](http://www.zsythink.net/archives/1182)
+
