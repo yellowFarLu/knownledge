@@ -1,4 +1,102 @@
-# 编程基础
+# Java基础
+
+
+
+## 数据类型
+
+
+
+### 基本类型
+
+![image-20190216171918836](https://ws3.sinaimg.cn/large/006tKfTcgy1g08dxrqn2rj30m20botbh.jpg)
+
+- java的基础类型有哪些？
+  - java总共8个基础数据类型，如下：
+  - boolean、char、byte、shot、int、long、float、double、void
+- **基本类型直接存储值**，并且存储于栈中，因此更加高效。
+- **java中基本类型的存储空间大小是固定的**，不会随机器硬件架构的变化而变化。这是java更加具有移植性的原因之一。
+
+- char占用2个字节、float占用4字节
+- boolean类型占几个字节？
+  - 《Java虚拟机规范》中是4字节，具体占用字节数看虚拟机实现。Java语言中的boolean值，在编译之后，都使用int类型来代替。
+  - 为什么使用int，因为对于32位处理器来说，一次处理数据是32位，具有高效存取的特点
+  - 参考：[boolean占用字节](https://www.cnblogs.com/wangtianze/p/6690665.html)
+
+
+
+
+
+### 包装类型
+
+- 基本类型都有对应的包装类型
+
+- 基本类型与其对应的包装类型之间的赋值使用自动装箱与拆箱完成。
+- 自动包装不能应用于数组。比如，int[]不能自动包装成Integer[]。
+
+```java
+Integer x = 2;     // 装箱 调用了 Integer.valueOf(2)
+int y = x;         // 拆箱 调用了 x.intValue()
+```
+
+
+
+### 缓存池
+
+包装类型为了提高性能，在类加载的时候预先初始化一些值，作为缓存。
+
+
+
+**new Integer(123) 与 Integer.valueOf(123) 的区别在于：**
+
+- new Integer(123)每次都会新建一个对象
+- Integer.valueOf(123) 会使用缓存池中的对象，多次调用会取得同一个对象的引用。
+
+```java
+Integer x = new Integer(123);
+Integer y = new Integer(123);
+System.out.println(x == y);    // false
+
+Integer z = Integer.valueOf(123);
+Integer k = Integer.valueOf(123);
+System.out.println(z == k);   // true
+```
+
+valueOf() 方法的实现比较简单，就是先判断值是否在缓存池中，如果在的话就直接返回缓存池的内容。
+
+```java
+public static Integer valueOf(int i) {
+    if (i >= IntegerCache.low && i <= IntegerCache.high)
+        // -128~127的顺序存放，因此要加上一段偏移量
+        return IntegerCache.cache[i + (-IntegerCache.low)];
+    return new Integer(i);
+}
+```
+
+**在 Java 8 中，Integer 缓存池的大小默认为 -128~127。**
+
+编译器会在自动装箱的过程中调用 valueOf() 方法，因此多个值相同且值在缓存池范围内的 Integer 实例使用自动装箱来创建，那么就会引用相同的对象。
+
+```java
+Integer m = 123;
+Integer n = 123;
+System.out.println(m == n); // true
+```
+
+在使用基本类型对应的包装类型时，如果该数值范围在缓冲池范围内，就可以直接使用缓冲池中的对象。
+
+- Boolean： 缓存了true或者false
+- Character：缓存了0~128的整数对应的字符
+- Byte：缓存了-128~127
+- Shot：缓存了-128~127
+- Integer：缓存了-128~127
+
+在 jdk 1.8 所有的数值类缓冲池中，Integer 的缓冲池 IntegerCache 很特殊，这个缓冲池的下界是 - 128，上界默认是 127，**但是这个上界是可调的**，在启动 jvm 的时候，通过 -XX:AutoBoxCacheMax=<size> 来指定这个缓存池的大小，该选项在 JVM 初始化的时候会设定一个名为 java.lang.IntegerCache.high 系统属性，然后 IntegerCache 初始化的时候就会读取该系统属性来决定上界。
+
+
+
+
+
+
 
 
 
@@ -165,21 +263,6 @@ java通过包路径 和 类名 区分类，如果这两个都一样，就会引�
 
 
 
-### 基本类型
-
-基本类型直接存储值，并且存储于堆栈中，因此更加高效。java中基本类型的存储空间大小是固定的，不会随机器硬件架构的变化而变化。这是java更加具有移植性的原因之一。![image-20190216171918836](https://ws3.sinaimg.cn/large/006tKfTcgy1g08dxrqn2rj30m20botbh.jpg)
-
-- char占用2个字节、float占用4字节
-- java的基础类型有哪些？
-  - java总共8个基础数据类型，如下：
-  - boolean、char、byte、shot、int、long、float、double、void
-- boolean类型占几个字节？
-  - 《Java虚拟机规范》中是4字节，具体占用字节数看虚拟机实现。Java语言中的boolean值，在编译之后，都使用int类型来代替。
-  - 为什么使用int，因为对于32位处理器来说，一次处理数据是32位，具有高效存取的特点
-  - 参考：[boolean占用字节](https://www.cnblogs.com/wangtianze/p/6690665.html)
-
-
-
 
 
 
@@ -279,16 +362,6 @@ java中多态是通过**动态绑定**实现的。
 
 
 
-
-## 自动包装
-
-- 自动包装不能应用于数组。比如，int[]不能自动包装成Integer[]。
-
-
-
-**Integer的缓存范围**
-
--128 到 127
 
 
 
