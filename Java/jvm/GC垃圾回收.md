@@ -558,7 +558,7 @@ G1收集器之所以能建立可预测的停顿时间模型，是因为它可以
 
 在进行Minor GC之前，虚拟机将会检查**老年代最大可用的连续空间**是否大于**新生代所有对象总空间**。如果这个条件成立，则认为Minor GC是安全的（老年代可以担保成功）。
 
-如果不成立，则虚拟机会查看HandlePromotionFailure设置值是否允许担保失败。如果允许，将检查老年代最大可用连续空间是否 大于 历次晋升到老年代的对象容量大小的平均值。如果大于，则尝试进行一次Minor GC。如果小于，或者HandlePromotionFailure设置为不允许担保失败，则进行一次Full GC。
+如果不成立，则虚拟机会查看HandlePromotionFailure设置值**是否允许担保失败**。如果允许，将检查老年代最大可用连续空间是否 大于 历次晋升到老年代的对象容量大小的平均值。如果大于，则尝试进行一次Minor GC。如果小于，或者HandlePromotionFailure设置为不允许担保失败，则进行一次Full GC。
 
 HandlePromotionFailure一般打开，避免Full GC频繁。
 
