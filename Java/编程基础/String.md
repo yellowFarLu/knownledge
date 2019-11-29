@@ -1,14 +1,71 @@
 # String
 
+
+
+## 概念
+
 不可变的，每一次修改实际上生成新的字符串，并且该字符串的值是修改后的值。new String都是在堆上创建字符串对象
 
+String 被声明为 final，因此它不可被继承。(Integer 等包装类也不能被继承）
+
+在 Java 8 中，String 内部使用 char 数组存储数据。
+
+```java
+public final class String
+    implements java.io.Serializable, Comparable<String>, CharSequence {
+    /** The value is used for character storage. */
+    private final char value[];
+}
+```
+
+**String如何保证不可变？**
+
+- value 数组被声明为 final，这意味着 value 数组初始化之后就不能再引用其它数组
+- 并且String 内部没有改变 value 数组的方法，因此可以保证 String 不可变。
 
 
-### StringBuilder和StringBuffer
+
+### 类如何实现不可变
+
+- 所有域是final的，并且是private，并且提供修改对象状态的方法
+- 把类声明为final，保证类不可以被扩展，不可以被子类修改方法的行为从而改变域的值
+
+
+
+### 不可变的好处
+
+**1、线程安全**
+
+String 不可变性天生具备线程安全，可以在多个线程中安全地使用。
+
+
+
+**2、类的实现简单**
+
+由于对象是不可变的，天然支持线程安全，因此不用使用额外的代码来保证线程安全
+
+
+
+
+
+## 几种字符串类
+
+**String、StringBuilder、StringBuffer的区别**
+
+- 可变性
+  - String不可变
+  - StringBuilder、StringBuffer可变
+- 线程安全
+  - String不可变，因此是线程安全的
+  - StringBuilder不是线程安全的
+  - StringBuffer 是线程安全的，内部使用 synchronized 进行同步
+
+
+
+**StringBuilder、StringBuffer的区别**
 
 - StringBuffer 与 StringBuilder 中的方法和功能完全是等价的，
-
-- StringBuffer 中的方法大都采用了 synchronized 关键字进行修饰，因此是线程安全的，
+- StringBuffer 中的方法都采用了 synchronized 关键字进行修饰，因此是线程安全的，
 
 而 StringBuilder 没有这个修饰，可以被认为是线程不安全的。 
 
@@ -18,9 +75,57 @@
 
 
 
-### API
 
-####intern()  
+
+## 字符串常量池
+
+字符串常量池（String Pool）保存着所有字符串字面量（literal strings），这些字面量在编译时期就确定。不仅如此，还可以使用 String 的 intern() 方法在运行过程中将字符串添加到 字符串常量池 中。
+
+intern() 方法的实现如下：
+
+- JDK1.6的实现
+  - 当调用 intern() 方法时，编译器会先判断常量池中这个字符串是否存在，如果存在，直接返回该常量的引用；如果不存在，将该字符串添加到常量池中，并返回指向该常量的引用。
+- JDK 1.7的实现
+  - intern()方法先去查询常量池中是否有已经存在，如果存在，则返回常量池中的引用，这一点与之前没有区别，区别在于，如果在常量池找不到对应的字符串，则不会再将字符串拷贝到常量池，而只是在**常量池中生成一个对原字符串的引用**。简单的说，就是往常量池放的东西变了：原来在常量池中找不到时，复制一个副本放到常量池，1.7后则是将在堆上的地址引用复制到常量池。
+
+下面示例中，s1 和 s2 采用 new String() 的方式新建了两个不同字符串，而 s3 和 s4 是通过 s1.intern() 方法取得一个字符串引用。intern() 首先把 s1 引用的字符串放到 String Pool 中，然后返回这个字符串引用。因此 s3 和 s4 引用的是同一个字符串。
+
+```java
+String s1 = new String("aaa");
+String s2 = new String("aaa");
+System.out.println(s1 == s2);           // false
+String s3 = s1.intern();
+String s4 = s1.intern();
+System.out.println(s3 == s4);           // true
+```
+
+如果是采用 "bbb" 这种字面量的形式创建字符串，会自动地将字符串放入 String Pool 中。
+
+```java
+String s5 = "bbb";
+String s6 = "bbb";
+System.out.println(s5 == s6);  // true
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## API
+
+
+
+### intern()
 
 含义：
 
@@ -95,15 +200,17 @@ public class HYString {
   fasle
 ```
 
-
-
-
-
 参考 https://blog.csdn.net/soonfly/article/details/70147205
 
 
 
-#### Foramt
+
+
+
+
+
+
+### format()
 
 ```java
 public class HYFormat {
@@ -152,6 +259,10 @@ public class HYFormat {
 
 }
 ```
+
+
+
+
 
 
 
