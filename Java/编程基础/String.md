@@ -111,9 +111,48 @@ System.out.println(s5 == s6);  // true
 
 
 
+### new String("abc")
+
+new String("abc")创建几个对象？
+
+答案是：1个或者2个。
+
+如果代码是这样的：
+
+```java
+String str = new String("abc");
+```
+
+并且 abc 字符串之前没有用过，这毫无疑问创建了两个对象。一个是new String("abc")创建的新的对象，一个常量“abc”的内存创建出的一个新的String对象。
 
 
 
+但是如果代码是这样子的：
+
+```java
+String str1 = "abc";
+		
+String str2 = new String("abc");
+```
+
+首先我们打开cmd.exe, 通过javac *.java编译好该Java文件，然后通过命令javap -c *来查看java编译后的ByteCode字节码，
+
+![image-20191129223418225](https://tva1.sinaimg.cn/large/006tNbRwgy1g9fa9ns346j31080jewkp.jpg)
+
+ldc的含义是：将常量值从常量池中取出来并且压入栈中。从上图中，我们可以看到第0行和第7行中的字符串引用是同一个，这说明了，在编译期间，该字符串变量的值已经确定了下来，并且将该字符串值缓存在缓冲区中，同时让该变量指向该字符串值，后面如果有使用相同的字符串值，则继续指向同一个字符串值
+
+所以String str2 = new String("abc"); 此时就创建一个对象，而abc 则是从字符串常量缓冲区中取出来的。并且会把“abc”的引用作为构造函数的参数，以下是 String 构造函数的源码，可以看到，在将一个字符串对象作为另一个字符串对象的构造函数参数时，并不会完全复制 value 数组内容，而是都会指向同一个 value 数组。
+
+```java
+public String(String original) {
+    this.value = original.value;
+    this.hash = original.hash;
+}
+```
+
+
+
+参考：[new String("abc")创建几个对象](https://blog.csdn.net/limingchuan123456789/article/details/14150327#commentBox)
 
 
 
