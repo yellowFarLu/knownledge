@@ -16,7 +16,9 @@ Tomcat是开源的 Java Web 应用服务器，实现了 Java EE规范，如果Se
 
 **Service**：即**web服务**， 包含Connectors、Container 两个 核心组件，以及多个功能组件，各个Service 之间是独立的，但是共享同一JVM 的资源
 
-**Connector**：**Tomcat 与外部世界的连接器**。负责监听固定端口，接收外部请求，传递给 Container，并 将 Container 处理的结果返回给外部
+**Connector**：**Tomcat 与外部世界的连接器**。
+
+- 负责监听固定端口，接收外部请求，传递给 Container，并将 Container 处理的结果返回给外部
 
 **Container**：即**Servlet 容器（Catalina）**，内部有多层容器组成，用于管理 Servlet 生命周期，调用 servlet 相关方法。
 
@@ -97,15 +99,15 @@ StandardServer 完成 init 和 start 方法调用后，会一直监听来自8005
 
 Servlet 生命周期可被定义为从创建直到毁灭的整个过程。以下是 Servlet 遵循的过程：
 
-1.被创建：执行init方法，只执行一次
+1.被创建：执行init方法
 
 　　1.1Servlet什么时候被创建？
 
-　　--默认情况下，第一次被访问时，Servlet被创建，然后执行init方法；
+　　-- 默认情况下，第一次被访问时，Servlet被创建，然后执行init方法（只执行一次）
 
-　　--可以配置执行Servlet的创建时机；
+　　-- 可以配置执行Servlet的创建时机
 
-2.提供服务：执行service方法，执行多次
+2.提供服务：执行service()方法
 
 3.被销毁：当服务器正常关闭时，执行destroy方法，只执行一次
 
@@ -136,7 +138,7 @@ Servlet 生命周期可被定义为从创建直到毁灭的整个过程。以下
 
 ###Servlet和Spring
 
-spring-mvc的前置控制器DispatcherServlet实际上就是一个servler，前置控制器能够拦截请求，将其分发给Controller处理
+spring-mvc的前置控制器DispatcherServlet实际上就是一个servlet，前置控制器能够拦截请求，将其分发给Controller处理
 
 
 

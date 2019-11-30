@@ -51,8 +51,6 @@ class DirFilter implements FilenameFilter {
 - IO面向流，NIO面向块（ByteBuffer）传输
 - NIO使用多路复用实现
 
-（**IO也就是BIO**）
-
 
 
 

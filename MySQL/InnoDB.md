@@ -183,10 +183,9 @@ InnoDB 存储引擎开创性地设计了 Insert Buffer 。
 
 ## 与MyISAM区别
 
-- InnoDB支持事务，MyISAM不支持
-- InnoDB支持外键，而MyISAM不支持
-- InnoDB支持行锁，MyISAM只支持表锁
-- InnoDB是聚集索引。而MyISAM是非聚集索引
+- InnoDB支持**事务**、**外键**，MyISAM不支持
+- InnoDB**支持行锁**，MyISAM**只支持表锁**
+- InnoDB是**聚集索引**。而MyISAM是非聚集索引
 
 - InnoDB不保存表的具体行数（执行select count(*) from table时需要全表扫描）。而MyISAM用一个变量保存了整个表的行数，执行上述语句时只需要读出该变量即可，速度很快；
   - InnoDB 5.7中对select count(*)的优化： http://www.bcty365.com/content-35-5679-1.html

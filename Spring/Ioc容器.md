@@ -237,7 +237,7 @@ public class DemoA {
 
 ###注解注入
 
-如常见的@Resource、@Controller
+如常见的@Resource、@Controller、@Autowire、@Server
 
 
 
