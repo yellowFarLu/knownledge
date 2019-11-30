@@ -151,7 +151,7 @@ NIO 实现了 IO 多路复用中的 Reactor 模型，**一个线程使用一个�
 
 因为创建和切换线程的开销很大，因此使用一个线程来处理多个事件而不是一个线程处理一个事件，对于 IO 密集型的应用具有很好地性能。
 
-应该注意的是，只有套接字 Channel 才能配置为非阻塞，而 FileChannel 不能，为 FileChannel 配置非阻塞也没有意义。
+应该注意的是，只有套接字 Channel 才能配置为非阻塞，而 FileChannel 不能，为 FileChannel 配置非阻塞也没有意义（FileChannel是本地读取数据，肯定不会阻塞）。
 
 <img src="https://tva1.sinaimg.cn/large/006tNbRwgy1g9fxwspn5zj30hy0cmaaz.jpg" alt="image-20191130121221604" style="zoom:67%;" />
 

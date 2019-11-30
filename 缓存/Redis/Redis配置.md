@@ -2,7 +2,7 @@
 
 ./redis-server &
 
-
+参考：https://blog.csdn.net/Jason_M_Ho/article/details/80007330
 
 
 

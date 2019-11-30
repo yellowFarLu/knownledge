@@ -608,6 +608,8 @@ public class CloneConstructorExample {
 - 客户端程序员（使用类的程序员）无法触及它们不应该触及的部分
 - 类库设计者可以改变类内部的工作方法，而不必担心影响到客户端程序员
 
+
+
 ### 设定边界的关键字
 
 - public：任何人都可以访问该元素
@@ -617,9 +619,13 @@ public class CloneConstructorExample {
 
 范围大小：public > protected > default > private
 
+
+
 ### 组合
 
 使用现有的类，组成新的类，称为组合。优先使用组合，再使用继承。因为组合更加简单灵活。
+
+
 
 ### 函数调用
 
@@ -630,6 +636,8 @@ public class CloneConstructorExample {
 - 后期绑定：在运行时根据对象的类型进行绑定。Java中除了**static方法**和**final方法**（private方法被自动认为是final方法）之外，其他所有的方法都是后期绑定。**后期绑定是java中实现的多态的基础**。这个怎么实现呢？
 
   为了实现后期绑定，java使用一小段特殊代码来代替绝对地址的调用，特殊代码中：使用对象中存储的信息来计算方法体的地址。从而实现调用具体对象的某个方法。
+  
+  
 
 ### 类的成员
 

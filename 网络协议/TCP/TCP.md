@@ -4,7 +4,7 @@
 
 ##概述
 
-是一种可靠的，面向连接，基于字节流，全双工的协议。
+TCP是一种可靠的，面向连接，基于字节流，全双工的协议。
 
 ![image-20191001132756993](https://tva1.sinaimg.cn/large/006y8mN6gy1g7imwypvvvj313y0ikwnb.jpg)
 
