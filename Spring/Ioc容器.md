@@ -296,9 +296,9 @@ private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<Str
 
 
 
-**Spring解决循环依赖的诀窍就在于singletonFactories这个缓存。**
+**Spring解决循环依赖的诀窍就在于singletonFactories（三级缓存）**
 
-当单例这个对象已经被生产出来了，虽然还不完美（还没有进行属性填充、初始化），但是已经能被人认出来了（**根据对象引用能定位到堆中的对象**），所以Spring此时将这个对象提前曝光出来让大家认识
+当单例这个对象已经被生产出来了，即分配了内存空间，并且调用构造方法了，虽然还不完美（还没有进行属性填充、初始化），但是已经能被人认出来了（**根据引用能定位到堆中的对象**），所以Spring此时将这个对象提前曝光出来让大家认识
 
 
 
@@ -375,13 +375,32 @@ private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<Str
 
 - BeanFactoryPostProcessor：
   - BeanFactory后置处理器，是对BeanDefinition进行修改。
-  - BeanFactoryPostProcessor接口是针对bean容器的，它的实现类可以在**当前BeanFactory初始化（spring容器加载bean定义文件）后，bean实例化之前**修改BeanDefinition，达到影响之后实例化bean的效果。
-
+  
+- BeanFactoryPostProcessor接口是针对bean容器的，它的实现类可以在**当前BeanFactory初始化（spring容器加载bean定义文件）后，bean实例化之前**修改BeanDefinition，达到影响之后实例化bean的效果。
+  
+  - ```java
+    @Component
+    public class BeanFactoryPostProcessorDemo implements BeanFactoryPostProcessor {
+    
+        @Override
+        public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+    
+            // 获取bean定义
+            BeanDefinition beanDefinition =
+                    beanFactory.getBeanDefinition("beanId");
+    
+            // 修改BeanDefinition，从而影响之后实例化的bean
+            // ..
+        }
+    }
+    ```
+  
 - BeanPostProcessor：
   - Bean后置处理器，是对生成的Bean对象进行修改。
   - BeanPostProcessor能在spring容器实例化bean之后，在执行bean的初始化方法前后，添加一些自己的处理逻辑
 
 - BeanPostProcessor执行逻辑： 
+  
   - postProcessBeforeInitialization --->  init-method（bean标签里面的） ---> postProcessAfterInitialization
 
 

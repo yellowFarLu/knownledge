@@ -1,8 +1,6 @@
----
-typora-copy-images-to: ipic
----
+# HTTP
 
-
+HTTP是请求-响应模型，在TCP/IP四层协议中的应用层。
 
 HTTP协议用于客户端和服务器之间进行通讯。
 
