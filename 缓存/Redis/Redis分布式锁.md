@@ -168,3 +168,7 @@ public class RedisWithReentrantLock {
 
 [watch机制](https://juejin.im/book/5afc2e5f6fb9a07a9b362527/section/5afc3747f265da0b71567686)
 
+https://www.jianshu.com/p/7e47a4503b87
+
+https://blog.csdn.net/chen_kkw/article/details/81433470
+
