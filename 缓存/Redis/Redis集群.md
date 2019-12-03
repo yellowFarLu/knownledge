@@ -347,3 +347,6 @@ Redis Cluster 有三个特殊的 `error` 指令，一个是 `moved`，一个是 
 ## 参考
 
 [sentinel](https://juejin.im/book/5afc2e5f6fb9a07a9b362527/section/5afc366751882567105ff0f3)
+
+[Redis Cluster实践](https://www.cnblogs.com/diegodu/p/9183356.html)
+

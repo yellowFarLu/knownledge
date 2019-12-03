@@ -254,6 +254,12 @@ set(key, value, nx=True, ex=xxx)
 
 ### 原理
 
+RedLock一般是三个独立的master节点组成，这个集群用于实现分布式锁。类似于Zookeeper集群。
+
+![image-20191203223819079](https://tva1.sinaimg.cn/large/006tNbRwgy1g9jwv6zz7cj315u0oo778.jpg)
+
+
+
 在Redis的分布式环境中，我们假设有N个Redis master。这些节点**完全互相独立，不存在主从复制或者其他集群协调机制**。我们确保将在N个实例上使用与在Redis单实例下相同方法获取和释放锁。
 
 现在我们假设有5个Redis master节点，同时我们需要在5台服务器上面运行这些Redis实例，这样保证他们不会同时都宕掉。
@@ -269,19 +275,18 @@ set(key, value, nx=True, ex=xxx)
 
 
 
-**总感觉有问题，redLock不能用于sentinel集群，但是又以sentiel集群出现的问题作为背景。**
-
-
-
 
 
 ### RedLock缺点
 
+RedLock严重依赖系统时间，
 
+1. client1 从 ABC 三个节点处申请到锁，DE由于网络原因请求没有到达
+2. C节点的时钟往前推了，导致 lock 过期
+3. client2 在CDE处获得了锁，AB由于网络原因请求未到达
+4. 此时 client1 和 client2 都获得了锁
 
-
-
-
+而这个问题暂时没有解决办法。
 
 
 
