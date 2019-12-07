@@ -129,3 +129,4 @@ ZAB协议并不是Paxos算法的一个典型实现，在讲解ZAB和Paxos的区�
 - 在ZAB协议中，每个proposal都包含一个epoch值，用来代表当前的Leader周期。在Paxos算法中，同样存在这样的一个标识，只是名字变成了Ballot。
 
 在Paxos的基础上，**ZAB协议额外增加了一个同步阶段。**在同步阶段，新的Leader会确保存在过半的Follower已经提交了上一个Leader周期中的所有事务提案。
+
