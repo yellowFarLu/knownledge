@@ -596,6 +596,18 @@ Minor GC又称为新生代GC。指发生在新生代的垃圾收集动作。因�
 
 
 
+## 其他内存
+
+除了Java堆和永久代之外，还有一些区域会占用比较多的内存，这里所有内存总和受到操作系统进程最大内存的限制。
+
+- Direct Memory：可用过-XX: MaxDirectMemorySize调整大小，内存不足时，会抛出OutOfMemoryError 或者 OutOfMemoryError : Direct buffer memory
+- 线程堆栈：可通过-Xss调整大小。内存不足时抛出StackOverflowError（即无法分配新的栈帧）或者OutOfMemoryError: unable to create new native thread（无法建立新的线程）
+- Socket缓冲区：每个Socket连接都有Send和Receive两个缓冲区，分别占大约37KB和25KB内存，连接多的话，这两块内存占用也比较可观。如果无法分配，则可能抛出 IOException : Too many open files异常。
+- JNI代码：如果代码中使用JNI调用本地库，那本地库使用的内存也不在堆中
+- 虚拟机和GC：虚拟机、GC的代码执行也要消耗一定的内存
+
+
+
 
 
 ## 问题

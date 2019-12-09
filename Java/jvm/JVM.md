@@ -169,7 +169,13 @@ JDK中使用`DirectByteBuffer`对象来表示堆外内存，每个`DirectByteBuf
 
 如果JVM一直没有执行FGC的话，无效的`Cleaner`对象就无法放入到ReferenceQueue中，从而堆外内存也一直得不到释放，内存岂不是会爆？
 
-其实在初始化`DirectByteBuffer`对象时，如果当前堆外内存的条件很苛刻时，会主动调用`System.gc()`强制执行FGC。
+其实在初始化`DirectByteBuffer`对象时，如果当前堆外内存的条件很苛刻时，会主动调用`System.gc()`强制执行Full GC。
+
+**直接内存满了之后，不会主动通知垃圾收集器进行回收，而是等到老年代满了之后，触发Full GC，然后顺便回收直接内存中的废弃对象。**
+
+
+
+
 
 
 

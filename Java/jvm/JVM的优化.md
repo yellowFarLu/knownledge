@@ -32,7 +32,16 @@
 
 ![image-20191201170255821](https://tva1.sinaimg.cn/large/006tNbRwgy1g9hbxg2b7tj31ho0iu7ox.jpg)
 
+```java
+// 放一些参数在这里，方便复制使用
 
+-XX:+UseConcMarkSweepGC  // 使用CMS收集器
+-XX:+UseG1GC     // 使用G1收集器  
+```
+
+
+
+  
 
 
 
@@ -151,6 +160,14 @@ jstat -gc 5426 250 2
 jstat查询的结果各个字段参考：[jstat查看GC情况](https://www.cnblogs.com/yjd_hycf_space/p/7755633.html)，也可以参看下面的图片：
 
 ![image-20191201193108557](https://tva1.sinaimg.cn/large/006tNbRwgy1g9hg7nwg8nj31km0a2gqx.jpg)
+
+
+
+**-gccause的情况下，会输出LGCC，表示上一次发生GC的原因：**
+
+![image-20191208164015429](https://tva1.sinaimg.cn/large/006tNbRwgy1g9pem05r6oj318c03ewf7.jpg)
+
+
 
 
 
