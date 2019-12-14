@@ -12,7 +12,7 @@
 
 - java的基础类型有哪些？
   - java总共8个基础数据类型，如下：
-  - boolean、char、byte、shot、int、long、float、double、void
+    - byte、char、boolean、shot、int、long、float、double
 - **基本类型直接存储值**，并且存储于栈中，因此更加高效。
 - **java中基本类型的存储空间大小是固定的**，不会随机器硬件架构的变化而变化。这是java更加具有移植性的原因之一。
 
@@ -37,6 +37,10 @@
 Integer x = 2;     // 装箱 调用了 Integer.valueOf(2)
 int y = x;         // 拆箱 调用了 x.intValue()
 ```
+
+
+
+
 
 
 

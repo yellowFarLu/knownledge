@@ -56,8 +56,6 @@ dubbo.service.shutdown.wait=20000
 - 2、然后等待一定时间确保已经到达请求全部处理完毕
 - 3、由于服务已经在注册中心下线，当前应用不会有新的请求。这时再执行真正的关闭(`SIGTERM` 或`SIGINT`)流程（通过kill pid），就能保证服务无损。
 
-
-
 QOS可通过 telnet 或 HTTP 方式使用，具体方式请见[Dubbo-QOS命令使用说明](http://dubbo.apache.org/zh-cn/docs/user/references/qos.html)。
 
 
@@ -175,7 +173,7 @@ QOS可通过 telnet 或 HTTP 方式使用，具体方式请见[Dubbo-QOS命令�
 
 
 
-**Dubbo服务重启，如何做到服务的无损发布？**
+**Dubbo如何做到服务的无损发布？**
 
 - 1、在关闭应用前，首先通过 QOS 的`offline`指令下线所有服务
 - 2、然后等待一定时间确保已经到达请求全部处理完毕
