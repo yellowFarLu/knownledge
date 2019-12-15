@@ -17,23 +17,11 @@
 
 
 
-这篇文章讲介绍网络请求的几种方式，以及用户线程如果获取到最终的结果。
-
-
-
-
-
 
 
 ## 网络调用方式
 
-Dubbo使用Netty作为底层通讯框架，Netty是基于NIO实现的通讯框架，那么Dubbo是如何基于Netty进行网络通讯的呢？
-
-Dubbo为一种RPC通信框架，提供进程间的通信，在使用dubbo协议+Netty作为传输层时，提供三种API调用方式：
-
-1. 同步接口
-2. 异步带回调接口
-3. 异步不带回调接口
+Dubbo 支持同步和异步两种调用方式，其中异步调用还可细分为“有返回值”的异步调用和“无返回值”的异步调用。所谓“无返回值”异步调用是指服务消费方只管调用，但不关心调用结果，此时 Dubbo 会直接返回一个空的 RpcResult。若要使用异步特性，需要服务消费方手动进行配置。默认情况下，Dubbo 使用同步调用方式。
 
 
 
@@ -49,17 +37,17 @@ Dubbo里面通过参数isOneway、isAsync来控制调用方式：
 
 
 
-### 同步接口
+### 同步调用
 
 
 
 #### 概念
 
- 同步接口适用在大部分环境，通信方式简单、可靠，客户端发起调用，等待服务端处理，调用结果同步返回。
+同步调用适用在大部分环境，通信方式简单、可靠，客户端发起调用，等待服务端处理，调用结果同步返回。
 
 这种方式下，在高吞吐、高性能（响应时间很快）的服务接口场景中最为适用，可以减少异步带来的额外的消耗，也方便客户端做一致性保证。
 
-<img src="https://tva1.sinaimg.cn/large/006tNbRwgy1g9x81lx6nuj31180qe78g.jpg" alt="image-20191215105731790" style="zoom:50%;" />
+![006tNbRwgy1g9x81lx6nuj31180qe78g](https://tva1.sinaimg.cn/large/006tNbRwgy1g9x81lx6nuj31180qe78g.jpg)
 
 
 
@@ -157,15 +145,15 @@ private void doReceived(Response res) {
 
 
 
-### 异步带回调接口
+### 异步调用有返回值
 
 
 
 #### 概念
 
-异步带回调接口，用在任务处理时间较长，客户端应用线程不愿阻塞等待，而是为了提高自身处理能力希望服务端处理完成后可以异步通知应用线程。这种方式可以大大提升客户端的吞吐量，避免因为服务端的耗时问题拖死客户端。
+异步调用有返回值，用在任务处理时间较长，客户端应用线程不愿阻塞等待，而是为了提高自身处理能力希望服务端处理完成后可以异步通知应用线程。这种方式可以大大提升客户端的吞吐量，避免因为服务端的耗时问题拖死客户端。
 
-<img src="https://tva1.sinaimg.cn/large/006tNbRwgy1g9x8hg9imzj31000qs0wp.jpg" alt="image-20191215111248130" style="zoom:50%;" />
+![](https://tva1.sinaimg.cn/large/006tNbRwgy1g9x8hg9imzj31000qs0wp.jpg)
 
 
 
@@ -272,17 +260,17 @@ return new RpcResult();
 
 
 
-### 异步不带回调接口
+### 异步调用不带返回值
 
 
 
 #### 概念
 
-异步不带回调接口，一些场景为了进一步提升客户端的吞吐能力，只需发起一次服务端调用，不需关心调用结果，可以使用此种通信方式。
+异步调用不带返回值，一些场景为了进一步提升客户端的吞吐能力，只需发起一次服务端调用，不需关心调用结果，可以使用此种通信方式。
 
 一般在不需要严格保证数据一致性或者有其他补偿措施的情况下，选用这种，可以最小化远程调用带来的性能损耗。
 
-<img src="https://tva1.sinaimg.cn/large/006tNbRwgy1g9x9gr0n5jj30za0oyad1.jpg" alt="image-20191215114643497" style="zoom:50%;" />
+![](https://tva1.sinaimg.cn/large/006tNbRwgy1g9x9gr0n5jj30za0oyad1.jpg)
 
 
 
@@ -334,6 +322,7 @@ public class Filter2 implements Filter {
 boolean isSent = getUrl().getMethodParameter(methodName, Constants.SENT_KEY, false);
 currentClient.send(inv, isSent);
 RpcContext.getContext().setFuture(null);
+return new RpcResult();
 ```
 
 
