@@ -59,6 +59,48 @@ rehash是非常耗时的。在编写程序中，尽量确定HashMap的初始容�
 
 
 
+
+
+
+
+## hashMap1.8相对于1.7做了哪些改进
+
+
+
+### 插入元素的方式
+
+jdk1.7采用的是头插法，jdk1.8采用的是尾插法。
+
+jdk1.8之所以改成尾插法，是因为使用头插法在高并发的情况下，由于逆序容易形成环形链，导致死循环。
+
+通过采用尾插法，避免逆序，从而避免出现环形链，从而避免死循环。
+
+
+
+#### jdk1.8的插入参考
+
+![944365-c263d87e5eecdcb0](https://tva1.sinaimg.cn/large/006tNbRwgy1gaajtt2iqpj30tq1cmdkv.jpg)
+
+
+
+
+
+#### jdk1.7参考
+
+![944365-a5570a7fe29fb8b9](https://tva1.sinaimg.cn/large/006tNbRwgy1gaajsgalbnj30u00y70wz.jpg)
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## 问题
 
 
@@ -95,6 +137,84 @@ jdk1.7中，链表插入新节点**采用的是头插法**，这样在多线程�
 
 
 
+**new一个hashMap，初始容量为1000，然后插入1000个元素，会不会触发扩容？如果是10000呢？**
+
+首先初始容量为1000，那么数组的大小就是1024，那么此时 阈值=1024*0.75f = 768，这时候，当插入769个元素的时候，判断元素个数达到阈值，则触发扩容。
+
+为什么是1024呢？因为有tableSizeFor方法就是计算出大于元素数组个数的最小2次幂。之所以要这样子做，是因为要保持数组的元素个数为2的次幂，从而能够使用 hash&(n-1)这种取模计算方式，通过利用位运算，来提高效率。
+
+10000个元素的时候，同理。
+
+```java
+public HashMap(int initialCapacity, float loadFactor) {
+        // 默认负载因此为0.75f
+        this.loadFactor = loadFactor;
+        // 默认阈值为 传入数组初始容量的 最小二次幂
+        this.threshold = tableSizeFor(initialCapacity);
+}
+```
+
+```java
+final Node<K,V>[] resize() {
+
+        Node<K,V>[] oldTab = table;
+        // 获取旧的桶的个数（旧容量）
+        int oldCap = (oldTab == null) ? 0 : oldTab.length;
+        // 获取旧的阈值
+        int oldThr = threshold;
+        // 新的桶个数、新的阈值
+        int newCap, newThr = 0;
+
+        /*
+         * 这一块是根据旧容量、旧阈值来计算新容量、新阈值
+         */
+        if (oldCap > 0) {
+            // 有数组容量，说明之前已经初始化过了
+
+            if (oldCap >= MAXIMUM_CAPACITY) {
+                // 大于最大容量，无法扩容，那么就只能让阈值变为Integer.MAX_VALUE，从而避免下次扩容。
+                threshold = Integer.MAX_VALUE;
+                return oldTab;
+            }
+            else if ((newCap = oldCap << 1) < MAXIMUM_CAPACITY &&
+                     oldCap >= DEFAULT_INITIAL_CAPACITY)
+                // 容量扩容2倍，并且扩容后小于最大容量，证明下次还可能扩容。但是不想它频繁的进行扩容，所以让阈值也扩容2倍
+                newThr = oldThr << 1;
+        }
+        else if (oldThr > 0)
+            /*
+             * 旧的容量为0，但是旧阈值大于0的情况下，初始容量设置为旧阈值
+             * 假如通过 new HashMap(1000) 这种情况下，一开始threshold计算为1024，然后通过这句代码，传递为新容量的大小
+             */
+            newCap = oldThr;
+        else {
+            // 旧容量、阈值都为0，则使用默认值
+            newCap = DEFAULT_INITIAL_CAPACITY;
+            newThr = (int)(DEFAULT_LOAD_FACTOR * DEFAULT_INITIAL_CAPACITY);
+        }
+
+        if (newThr == 0) {
+            float ft = (float)newCap * loadFactor;
+            // 计算新的阈值，值=新的数组容量 * 负载因子
+            newThr = (newCap < MAXIMUM_CAPACITY && ft < (float)MAXIMUM_CAPACITY ?
+                      (int)ft : Integer.MAX_VALUE);
+        }
+        threshold = newThr;
+
+		......
+}
+```
+
+
+
+
+
+
+
+
+
+
+
 
 
 ## 参考
@@ -110,4 +230,6 @@ https://juejin.im/post/5d412a5be51d45620e0b99af
 [扩容](https://www.jianshu.com/p/1ff9f3dee207)
 
 [HashMap死循环](https://www.jianshu.com/p/1e9cf0ac07f4)
+
+[hashMap1.8相对于1.7做了哪些改进](https://blog.csdn.net/qq_36520235/article/details/82417949)
 
