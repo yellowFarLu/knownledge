@@ -233,3 +233,6 @@ https://juejin.im/post/5d412a5be51d45620e0b99af
 
 [hashMap1.8相对于1.7做了哪些改进](https://blog.csdn.net/qq_36520235/article/details/82417949)
 
+[hashMap1.8及1.7源码对比](https://www.jianshu.com/p/8324a34577a0?utm_source=oschina-app)
+
+[hashMap1.7源码分析](https://www.jianshu.com/p/e5c8a814c0ca)
