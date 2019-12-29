@@ -7,6 +7,8 @@
 - 使用top指令，看看那个进程占用CPU比较高
   - ![image-20191229160807943](https://tva1.sinaimg.cn/large/006tNbRwgy1gadnp2h2vzj31z40pk45w.jpg)
 - 使用top -Hp PID查看该进程内的线程执行情况（左边第一列是线程ID）
+  - H表示设置线程模式，也就是展示线程的信息
+  - p表示展示某个进程的线程信息
   - ![image-20191229160955623](https://tva1.sinaimg.cn/large/006tNbRwgy1gadnqxvz8hj31z40mojyt.jpg)
 - 将这个线程ID转换成二进制
   - 通过语句  `printf "%x\n" TID`
