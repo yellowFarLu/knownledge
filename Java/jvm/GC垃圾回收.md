@@ -138,7 +138,7 @@ public Class<?> getDeclaringClass() throws SecurityException {
 
 
 
-##常见的垃圾回收算法
+## 常见的垃圾回收算法
 
 
 
@@ -274,7 +274,7 @@ Eden区是连续的空间，且Survivor总有一个为空。经过一次GC和复
 
 
 
-##HotSpot的GC算法实现
+## HotSpot的GC算法实现
 
 
 
