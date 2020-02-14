@@ -45,7 +45,7 @@ class DirFilter implements FilenameFilter {
 
 
 
-## IO及NIO的区别
+## BIO及NIO的区别
 
 - IO是阻塞的，NIO是非阻塞的
 - IO面向流，NIO面向块（ByteBuffer）传输
