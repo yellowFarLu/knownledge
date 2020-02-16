@@ -135,21 +135,21 @@ Java虚拟机栈也是线程私有的。它的生命周期与线程相同。
 
 ### 直接内存
 
-直接内存（堆外内存）并不是虚拟机运行时数据区的一部分，也不是Java 虚拟机规范中农定义的内存区域。
+直接内存（堆外内存）并不是虚拟机运行时数据区的一部分，也不是Java 虚拟机规范中农定义的内存区域。属于机器内存的一部分，不属于java堆。
 
-在JDK1.4 中新加入了NIO(New Input/Output)类，引入了一种基于通道(Channel)与缓冲区（Buffer）的I/O 方式，它可以使用native 函数库直接分配堆外内存，然后通脱一个存储在Java堆中的DirectByteBuffer 对象作为这块内存的引用进行操作。这样能在一些场景中显著提高性能，**因为避免了在Java堆和Native堆中来回复制数据**。
+在JDK1.4 中新加入了NIO(New Input/Output)类，引入了一种基于通道(Channel)与缓冲区（Buffer）的I/O 方式，它可以使用native 函数库直接分配堆外内存，然后通过一个存储在Java堆中的**DirectByteBuffer** 对象作为这块内存的引用进行操作。这样能在一些场景中显著提高性能，**因为避免了在Java堆和Native堆中来回复制数据**。
 
-本机直接内存的分配不会受到Java 堆大小的限制，受到本机总内存大小限制，JVM中有参数可以限制直接内存的大小（-XX MaxDirectMemorySize）。
+**本机直接内存的分配不会受到Java堆大小的限制，受到本机总内存大小限制。JVM中有参数可以限制直接内存的大小（-XX MaxDirectMemorySize）。**
 
 配置虚拟机参数时，不要忽略直接内存，防止出现OutOfMemoryError异常。
 
-Ecache就是使用堆外内存实现的。
+Ehcache就是使用堆外内存实现的。
 
 
 
 #### 堆外内存的回收
 
-JDK中使用`DirectByteBuffer`对象来表示堆外内存，每个`DirectByteBuffer`对象在初始化时，都会创建一个对用的`Cleaner`对象，这个`Cleaner`对象会在合适的时候执行`unsafe.freeMemory(address)`，从而回收这块堆外内存。
+JDK中使用`DirectByteBuffer`对象来表示堆外内存，每个`DirectByteBuffer`对象在初始化时，都会创建一个对应的`Cleaner`对象，这个`Cleaner`对象会在合适的时候执行`unsafe.freeMemory(address)`，从而回收这块堆外内存。
 
 当初始化一块堆外内存时，对象的引用关系如下：
 
@@ -172,6 +172,24 @@ JDK中使用`DirectByteBuffer`对象来表示堆外内存，每个`DirectByteBuf
 其实在初始化`DirectByteBuffer`对象时，如果当前堆外内存的条件很苛刻时，会主动调用`System.gc()`强制执行Full GC。
 
 **直接内存满了之后，不会主动通知垃圾收集器进行回收，而是等到老年代满了之后，触发Full GC，然后顺便回收直接内存中的废弃对象。**
+
+
+
+#### 特性
+
+- 直接内存的大小不受java堆大小的限制，而是受机器总内存大小的限制，可以通过JVM参数控制直接内存的大小。
+- 直接内存的回收是在发生Full GC的时候，回收了DirectByteBuffer之后，顺便回收堆外内存
+- 通过使用堆外内存，可以避免java堆和native堆中来回复制数据，在某些场景下能显著的提高性能
+
+
+
+#### 适用场景
+
+比如说”进程内缓存“，著名的Ehcache就是使用直接内存实现。为什么要使用直接内存呢？
+
+因为假如把数据直接存放到Java堆中，数据量大了以后，java堆也会很大，那么就会给GC带来压力。为了避免给GC带来压力可以使用直接内存。
+
+
 
 
 
