@@ -447,6 +447,23 @@ Tested指定的被测试类，必须是实现类，而非接口。否则不能�
 
 
 
+## 适用场景
+
+- 被测试类所依赖的类比较复杂，难以构造，这时候可以使用mock
+- 被测试类所依赖的接口还没有开发完，可以使用mock，保证被测试类的逻辑正确
+
+
+
+
+
+## 原理
+
+jmockit先通过Mocked注解标记需要Mock掉的类，jmockit使用ASM来修改原来的class文件，在JVM运行的时候，通过JDK6之后的动态Instrumentation特性监听类加载事件，并在目标类加载之前移花接木，用魔改后的字节码换掉真货（用mocked的实现掉包原来的代码）。
+
+虽然Java是门静态类型语言，不过幸亏有字节码和JVM作为中间层，使得mock实现起来相对容易。
+
+
+
 
 
 
@@ -457,3 +474,6 @@ Tested指定的被测试类，必须是实现类，而非接口。否则不能�
 
 [JMockit使用总结](https://www.cnblogs.com/shoren/p/jmokit-summary.html)
 
+[mock适用场景](https://cloud.tencent.com/developer/article/1388155)
+
+[Mock的实现原理](https://segmentfault.com/a/1190000003718149)
