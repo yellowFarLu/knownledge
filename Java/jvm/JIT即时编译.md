@@ -11,6 +11,5 @@ jvm的执行引擎中 有 一个解释器用来识别字节码指令，并将字
 
 参考：
 
-https://blog.csdn.net/sunxianghuang/article/details/52094859
+[JIT即时编译器](https://www.cnblogs.com/dzhou/p/9549839.html)
 
-https://www.cnblogs.com/jueyoq/p/7900232.html
