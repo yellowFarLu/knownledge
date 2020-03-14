@@ -351,3 +351,9 @@ AC 自动机是基于 Trie 树的一种改进算法，它跟 Trie 树的关系�
 
 
 
+## 参考
+
+[AC自动机](https://www.cnblogs.com/sclbgw7/p/9260756.html)
+
+[AC自动机—王争](https://time.geekbang.org/column/article/72810)
+
