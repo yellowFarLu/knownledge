@@ -2,6 +2,8 @@
 
 LinkedHashMap 继承自 HashMap，在 HashMap 基础上，通过维护一条双向链表，解决了 HashMap 不能保持遍历顺序和插入顺序一致的问题。除此之外，LinkedHashMap 对访问顺序也提供了相关支持。
 
+（支持按照插入顺序、访问顺序来遍历元素）
+
 
 
 ## 结构
