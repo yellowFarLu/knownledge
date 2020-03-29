@@ -50,12 +50,12 @@ Jmockit可以和junit和TestNG配合使用。需要注意的是：
 涉及到三个类：
 
 - 测试类：执行测试代码的类。
-- CUT（Code Under Test）：被测试的类，测试此类是否能正确地工作。
+- 被测试的类：测试此类是否能正确地工作。
 - 依赖类：CUT会调用依赖类的方法。
 
 
 
-CUT如下：
+被测试的类 如下：
 
 ```java
 @Data
@@ -130,21 +130,15 @@ public class CoderService {
 
 record（录制）---- replay（回放） ---- verify（验证）
 
-```java
-record : 设置将要被调用的方法和返回值。
-
-Expections中的方法至少被调用一次，否则会出现missing invocation错误。调用次数和调用顺序不限。
-StrictExpectations中方法调用的次数和顺序都必须严格执行。如果出现了在StrictExpectations中没有声明的方法，会出现unexpected invocation错误。
-replay：调用（未被）录制的方法，被录制的方法调用会被JMockit拦截并重定向到record阶段设定的行为。
-
-verify：基于行为的验证，测试CUT是否正确调用了依赖类，包括：调用了哪些方法；通过怎样的参数;调用了多少次;调用的相对顺序（VerificationsInOrder）等。可以使用times，minTimes，maxTimes来验证。
-```
-
-
+- record : 设置将要被调用的方法和返回值。
+  - Expections中的方法至少被调用一次，否则会出现missing invocation错误。调用次数和调用顺序不限。
+    StrictExpectations中方法调用的次数和顺序都必须严格执行。如果出现了在StrictExpectations中没有声明的方法，会出现unexpected invocation错误。
+- replay：调用录制的方法，被录制的方法调用会被JMockit拦截并重定向到record阶段设定的行为。
+- verify：基于行为的验证，**检查被测试类是否正确调用了依赖类**，包括：调用了哪些方法；通过怎样的参数; 调用了多少次; 调用的相对顺序（VerificationsInOrder）等。可以使用times，minTimes，maxTimes来验证。
 
 ```java
  @Test
-    public void mockProcessTest(final @Mocked PersonService target){
+    public void mockProcessTest(final @Mocked PersonService target) {
         //录制预期行为
         new Expectations(){
             {
@@ -158,15 +152,15 @@ verify：基于行为的验证，测试CUT是否正确调用了依赖类，包�
         //测试代码
         Assert.assertTrue("test1".equals(target.showName("test2")));
         Assert.assertTrue(-1 == target.showAge(12));
-        Assert.assertTrue(-1 == target.showAge(12));
 
-        //验证
+        // 验证
         new Verifications(){
             {
-                target.showName("test1");
-                times = 0; //执行了0次。参数一致的才会计数
                 target.showAge(12);
-                times = 2; //执行了2次
+                times = 2; // 检查showAge方法是否执行了2次
+
+                target.showName("test1");
+                times = 0; // 检查showName执行了0次。   只有入参和回放的入参一致时，才会计数
             }
         };
     }
