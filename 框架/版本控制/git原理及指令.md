@@ -248,3 +248,5 @@ merge 命令把不同分支合并起来。合并前，索引必须和当前提�
 
 [图解git](http://marklodato.github.io/visual-git-guide/index-zh-cn.html)
 
+[cherry-pick](https://blog.csdn.net/qq_32452623/article/details/79449534)
+
