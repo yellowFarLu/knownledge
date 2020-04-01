@@ -469,9 +469,17 @@ hashCode() 返回散列值，而 equals() 是用来判断两个对象是否等�
 
 在覆盖 equals() 方法时应当总是覆盖 hashCode() 方法，保证等价的两个对象散列值也相等。
 
+
+
 **为什么重写equals()一定要重写hashCode()？**
 
-因为HashMap中判断对象是否相等，既使用了hashCode()、也使用了equals()方法来判断，假如我们只重写了equals()方法，在equals()方法中通过对象的属性值判断对象是否相等，但是没有重写hashCode方法，那么就很可能出现equals()方法为true，但是判断hashCode是否相等返回false的情况。这就和开发人员的意向不符了。
+根据hashCode的规定，两个对象相等，那么他们的hashCode也一定相等。
+
+假如只重写了equals方法，那么两个对象可能判断为相等，但是调用hashCode()方法返回的哈希值不相等，这就违反了前面说的规定。因此，重写了euqals方法一定要重写hashCode()方法。
+
+参考: [为什么重写equals()一定要重写hashCode()方法](https://blog.csdn.net/xl_1803/article/details/80445481)
+
+
 
 
 
