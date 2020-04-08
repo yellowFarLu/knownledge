@@ -643,6 +643,14 @@ Minor GC又称为新生代GC。指发生在新生代的垃圾收集动作。因�
 
 
 
+**jvm命令触发full gc**
+
+jmap -histo:live <pid>
+
+参考：https://blog.csdn.net/delacroix_xu/article/details/80342615
+
+
+
 ## 参考
 
 https://blog.csdn.net/mccand1234/article/details/52078645
