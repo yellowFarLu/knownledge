@@ -67,6 +67,12 @@ public V putIfAbsent(K key, V value)
 
 
 
+### putIfAbsent
+
+put在放入数据时，如果放入数据的key已经存在与Map中，最后放入的数据会覆盖之前存在的数据。
+
+**putIfAbsent**  如果传入key对应的value已经存在，就返回存在的value，不进行替换。如果不存在，就添加key和value，返回null
+
 
 
 
