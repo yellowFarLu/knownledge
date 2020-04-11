@@ -65,3 +65,6 @@
 ## 参考
 
 [如何排查CPU占用过高以及常见的几种情况](https://blog.csdn.net/coderpopo/article/details/80332496)
+
+[线上故障排查积累](https://m.toutiaocdn.com/group/6760056297392964103/?app=news_article&timestamp=1586569157&req_id=20200411093917010130037138022AE6B9&group_id=6760056297392964103&tt_from=mobile_qq&utm_source=mobile_qq&utm_medium=toutiao_android&utm_campaign=client_share)
+
