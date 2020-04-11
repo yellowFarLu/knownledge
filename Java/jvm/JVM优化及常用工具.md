@@ -169,6 +169,14 @@ jstat查询的结果各个字段参考：[jstat查看GC情况](https://www.cnblo
 
 
 
+**查看YGC次数**
+
+![image-20200411134313948](https://tva1.sinaimg.cn/large/007S8ZIlgy1gdpryc2qbcj31om0cyjvb.jpg)
+
+图片里面的箭头指向YGC的次数
+
+
+
 
 
 
