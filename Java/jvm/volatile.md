@@ -249,3 +249,43 @@ concurrent包下的源码有一个通用化的实现模式：首先声明共享�
 
 
 
+## 错误使用方式
+
+```java
+public class IncrQuestionDemo {
+
+    private volatile static int value;
+
+    public static void main(String[] args) throws Exception {
+
+        Thread  t1 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                for (int i = 0; i < 10000; i++) {
+                    value++;
+                }
+            }
+        });
+
+        Thread  t2 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                for (int i = 0; i < 10000; i++) {
+                    value++;
+                }
+            }
+        });
+
+        t1.start();
+        t2.start();
+
+        t1.join();
+        t2.join();
+
+        System.out.println(value);
+    }
+
+}
+```
+
+这个例子中试图使用volatile保证同步，实际上是不可行的，因为线程1和线程2可能同时在本地读取到value是0，然后加1，然后刷回主存，然后把其他行缓存给清空了，2个线程再读取到的value还是1，起不到同步的作用。

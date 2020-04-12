@@ -627,11 +627,15 @@ Minor GC又称为新生代GC。指发生在新生代的垃圾收集动作。因�
 
 为了针对不同的内存区域采用不同垃圾收集算法，从而提高效率
 
+<br/>
+
 
 
 **年轻代为什么被划分成eden、survivor区域？**
 
 通过划分eden、survivor区，能够提高年轻代的内存使用率。因为年轻代的大部分对象都会很快死去，因此只需要使用少部分的内存来保留存活对象。
+
+<br/>
 
 
 
@@ -639,7 +643,7 @@ Minor GC又称为新生代GC。指发生在新生代的垃圾收集动作。因�
 
 老年代都是活的比较久的对象。可能为年轻代的对象经过多次GC后存活然后放入老年代，也可能是大对象直接在老年代分配内存空间
 
-
+<br/>
 
 
 
@@ -648,6 +652,34 @@ Minor GC又称为新生代GC。指发生在新生代的垃圾收集动作。因�
 jmap -histo:live <pid>
 
 参考：https://blog.csdn.net/delacroix_xu/article/details/80342615
+
+<br/>
+
+
+
+**CMS有哪些重要参数？**
+
+![image-20200412140206417](https://tva1.sinaimg.cn/large/007S8ZIlgy1gdqy4ahpe4j319609012n.jpg)
+
+<br/>
+
+
+
+**concurrent mode failure的发生原因？**
+
+CMS的垃圾清理和用户线程是并行进行的，如果在并行清理的过程中老年代的空间不够让用户线程使用，则会抛出“concurrent mode failure”。
+
+
+
+<br/>
+
+
+
+**promotion failed的发生原因？**
+
+在发生Minor GC的时候，survivor空间放不下存活对象，然后尝试放到老年代，老年代也放不下，因此发生promotion failed。
+
+
 
 
 

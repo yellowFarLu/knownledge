@@ -389,6 +389,8 @@ I/O属于底层操作，需要操作系统支持，并发也需要操作系统�
 
 
 
+
+
 ## 参考
 
 [BIO、NIO、AIO原理](https://www.cnblogs.com/barrywxx/p/8430790.html?from=singlemessage)
@@ -397,3 +399,4 @@ I/O属于底层操作，需要操作系统支持，并发也需要操作系统�
 
 [BIO、NIO、AIO适用场景](https://www.cnblogs.com/hujinshui/p/10368985.html)
 
+[select、poll、eopll的区别l](https://www.cnblogs.com/Anker/p/3265058.html)

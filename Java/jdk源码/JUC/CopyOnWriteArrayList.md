@@ -4,11 +4,17 @@
 
 ## 概述
 
-利用写时复制来实现的一个线程安全的ArrayList类，任何对内部数组的更改操作都被锁保护，更改操作都是在拷贝的新数组上进行。
+"写入时复制(Copy-on-write)" 容器。每次修改时，都会创建并重新发布一个新的容器副本，从而实现可变性。
+
+（1）多个线程可以并发的读该容器，即时是有线程正在修改这个容器，别的线程也能读（读旧的）。
+
+（2）原理是，当要修改这个容器时，会拷贝一份新的容器，然后修改新的容器，在修改过程中，别的线程不能同时修改，但是可以继续读取旧的容器。当修改完成后，会将原容器的引用指向新的容器。
+
+（3）读的时候不加锁，写的时候加锁。
 
 
 
-### 适用场景
+## 适用场景
 
 适合读请求远大于写请求的场景。
 
@@ -21,13 +27,13 @@
 
 
 
-### 读写分离
+## 读写分离
 
-写操作在一个复制的数组上进行，读操作还是在原始数组中进行，读写分离，互不影响。
+写操作在一个复制的数组上进行，读操作还是在原始数组中进行，读写分离，互不影响。（读写并行）
 
-写操作需要加锁，防止并发写入时导致写入数据丢失。
+写操作需要加锁，防止并发写入时导致写入数据丢失。（写写串行）
 
-写操作结束之后需要把原始数组指向新的复制数组。
+写操作结束之后需要（把原始数组指向新的数组）。
 
 
 
@@ -67,16 +73,98 @@
 
 
 
+## 写时复制机制
+
+多个调用者请求相同的资源时，系统会让这些调用者使用同一份资源，即读取同一份资源。
+
+只有当某个调用者想要修复数据的时候，才会给他复制一份资源副本。
+
+这样子做的优点是可以节约资源。
+
+
+
+
+
+## 实战
+
+```java
+import java.util.concurrent.CopyOnWriteArrayList;
+
+/**
+ * @author huangy on 2019-10-14
+ */
+public class CopyOnWriteArrayListDemo {
+
+    public static void main(String[] args) throws Exception {
+
+        CopyOnWriteArrayList<Integer> arrayList = new CopyOnWriteArrayList<>();
+
+        Thread t1 = new Thread(() -> {
+            try {
+                System.out.println("线程1尝试修改");
+                arrayList.add(1);
+                System.out.println("线程1修改好了");
+                Thread.sleep(3000);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        t1.start();
+
+        Thread t2 = new Thread(() -> {
+            try {
+                // 睡一下，保证线程1获取到锁
+                Thread.sleep(200);
+
+                System.out.println("线程2尝试修改");
+                arrayList.add(2);
+                System.out.println("线程2修改好了");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        t2.start();
+
+        t1.join();
+        t2.join();
+
+        System.out.println(arrayList);
+    }
+
+}
+```
+
+
+
+
+
+
+
+
+
 ## 问题
 
 **为什么没有ConcurrentArrayList？**
 
-如果有ConcurrentArrayList，当ConcurrentArrayList插入或者删除元素的时候，如果为了保证线程安全，将阻塞其他线程，那么将极大影响到性能。因为ArrayList的插入、删除涉及到元素移动，会很慢，而元素移动这段时间将一直造成阻塞其他线程的请求。
+很难去开发一个通用并且没有并发瓶颈的线程安全的List。像ConcurrentHashMap可以在保证线程安全的情况不存在性能瓶颈，因为其使用了分段锁，而List很难做到，List保证线程安全只能锁住整个List，但是这样子就造成性能瓶颈。
+
+<br/>
 
 
+
+**CopyOnWriteArrayList是如何保证线程安全的？**
+
+- 当多个写请求同时发生的时候，使用ReentrantLock进行同步，保证一次只有一个线程能进行修改操作
+
+<br/>
 
 
 
 ## 参考
 
 https://blog.csdn.net/sinat_34976604/article/details/86684926
+
+[写时复制机制](https://blog.csdn.net/ljb825802164/article/details/88528726)
+
+[为什么没有ConcurrentArrayList](https://www.cnblogs.com/heyi-77/p/9835184.html)
+

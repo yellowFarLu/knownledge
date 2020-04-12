@@ -22,15 +22,25 @@ TreeMap基于红黑树实现。
 
 
 
+### tailMap
+
+`SortedMap<K,V> tailMap(K fromKey)`返回TreeMap中大于、等于key的子集。
+
+利用这个特性，可以很方便的实现一致性hash算法。
+
+
+
 
 
 ## 实现一致性Hash算法
 
-一致性Hash环要求能**快速通过key查找到桶的位置**，并且**桶在环上有序**，所以使用TreeMap来实现环。
+一致性Hash环要求能**快速定位元素**，并且**元素在环上有序**，所以使用TreeMap来实现环。
 
 ```java
+import java.util.*;
+
 /**
- * 带虚拟节点的一致性Hash算法
+ * 一致性Hash算法的实现
  */
 public class ConsistentHashingWithVirtualNode {
 
@@ -47,7 +57,8 @@ public class ConsistentHashingWithVirtualNode {
     private static List<String> realNodes = new LinkedList<String>();
 
     /**
-     * 虚拟节点，key表示虚拟节点的hash值，value表示虚拟节点的名称
+     * hash环
+     * key表示虚拟节点的hash值，value表示虚拟节点的名称
      */
     private static SortedMap<Integer, String> virtualNodes = new TreeMap<Integer, String>();
 
@@ -57,18 +68,21 @@ public class ConsistentHashingWithVirtualNode {
     private static final int VIRTUAL_NODES = 5;
 
     static {
-        // 先把原始的服务器添加到真实结点列表中
-        for (int i = 0; i < servers.length; i++) {
-            realNodes.add(servers[i]);
-        }
+
+        // 先把服务器添加为真实节点
+        Collections.addAll(realNodes, servers);
 
 
-        // 再添加虚拟节点，遍历LinkedList使用foreach循环效率会比较高
+        // 再把真实节点转换为虚拟节点
         for (String str : realNodes) {
             for (int i = 0; i < VIRTUAL_NODES; i++) {
-                String virtualNodeName = str + "&&VN" + String.valueOf(i);
+
+                String virtualNodeName = str + "&&VN" + i;
+
                 int hash = getHash(virtualNodeName);
+
                 System.out.println("虚拟节点[" + virtualNodeName + "]被添加, hash值为" + hash);
+
                 virtualNodes.put(hash, virtualNodeName);
             }
         }
@@ -99,24 +113,25 @@ public class ConsistentHashingWithVirtualNode {
      * 得到应当路由到的结点
      */
     private static String getServer(String node) {
-        
+
         // 得到带路由的结点的Hash值
         int hash = getHash(node);
 
         // 得到大于该Hash值的所有Map
         SortedMap<Integer, String> subMap = virtualNodes.tailMap(hash);
 
-        //自己加的,考虑到subMap中没有数据，就取virtualNodes中的第一个值
-        if (null == subMap || subMap.size() <= 0) {
+        // 如果subMap中没有数据，就取virtualNodes中的第一个值
+        if (subMap.size() <= 0) {
             subMap = virtualNodes;
         }
 
-        // 第一个Key就是顺时针过去离node最近的那个结点
+        // 第一个Key就是顺时针找到的第一台服务器的hash值
         Integer i = subMap.firstKey();
 
-        // 返回对应的虚拟节点名称，这里字符串稍微截取一下
+        // 通过该hash值，找到对应的虚拟节点名称
         String virtualNode = subMap.get(i);
 
+        // 通过虚拟节点名称，获取真实机器IP
         return virtualNode.substring(0, virtualNode.indexOf("&&"));
     }
 

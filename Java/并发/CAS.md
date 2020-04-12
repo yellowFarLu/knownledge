@@ -1,4 +1,4 @@
-# CAS与锁
+# CAS
 
 
 
@@ -46,7 +46,7 @@
 
 CAS是项乐观锁技术，当多个线程尝试使用CAS同时更新同一个变量时，只有其中一个线程能更新变量的值，而其它线程都失败，失败的线程并不会被挂起，而是被告知这次竞争中失败，并可以再次尝试。非阻塞。
 
-CAS （compareAndSwap），中文叫比较交换，一种无锁原子算法。过程是这样：它包含 3 个参数 CAS（V，E，N），V表示要更新变量的值，E表示预期值，N表示新值。仅当 V值等于E值时，才会将V的值设为N，如果V值和E值不同，则说明已经有其他线程做两个更新，则当前线程则什么都不做。最后，CAS 返回当前V的真实值。CAS 操作时抱着乐观的态度进行的，它总是认为自己可以成功完成操作。
+CAS （compareAndSwap），中文叫比较交换，一种无锁原子算法。过程是这样：它包含 3 个参数 CAS（V，E，N），V表示要更新**变量的值**，E表示预期值，N表示新值。仅当 V值等于E值时，才会将V的值设为N，如果V值和E值不同，则说明已经有其他线程做两个更新，则当前线程则什么都不做。最后，CAS 返回当前V的真实值。CAS 操作时抱着乐观的态度进行的，它总是认为自己可以成功完成操作。
 
 当多个线程同时使用CAS 操作一个变量时，只有一个会胜出，并成功更新，其余均会失败。失败的线程不会挂起，仅是被告知失败，并且允许再次尝试，当然也允许实现的线程放弃操作。基于这样的原理，CAS 操作即使没有锁，也可以发现其他线程对当前线程的干扰。
 
@@ -70,9 +70,17 @@ CAS （compareAndSwap），中文叫比较交换，一种无锁原子算法。�
 
 
 
+### 优点
+
+- 不会阻塞线程。将线程挂起的话，将涉及操作系统由用户态到的内核态的切换，从而提高性能。
+
+
+
+
+
 ### 缺点
 
-#### ABA问题
+- ABA问题
 
 比如说一个线程one从内存位置V中取出A，这时候另一个线程two也从内存中取出A，并且two进行了一些操作变成了B，然后two又将V位置的数据变成A，这时候线程one进行CAS操作发现内存中仍然是A，然后one操作成功。尽管线程one的CAS操作成功，但是不代表这个过程就是没有问题的。如果链表的头在变化了两次后恢复了原值，但是不代表链表就没有变化。
 
@@ -82,15 +90,138 @@ CAS （compareAndSwap），中文叫比较交换，一种无锁原子算法。�
 
 
 
-#### 长时间不成功导致开销大
+-  长时间不成功导致开销大
 
 自旋CAS如果长时间不成功，会给CPU带来非常大的执行开销。
 
 
 
-#### **只能保证一个共享变量的原子操作**
+- 只能保证一个共享变量的原子操作
 
 可以使用AtomicReference保证多个变量更新的原子性。
+
+
+
+
+
+### 适用场景
+
+适用于竞争较少的场景。
+
+
+
+
+
+### CAS实现乐观锁
+
+```java
+import sun.misc.Unsafe;
+
+import java.lang.reflect.Field;
+
+/**
+ *  CAS实现乐观锁
+ *  AtomicInteger 实际上就是实现了一个乐观锁
+ * @author huangy on 2020-04-12
+ */
+public class CasLock {
+
+    // 通过反射方法获取unsafe对象
+    private static final Unsafe unsafe = getUnsafe();
+
+    private static final long valueOffset;
+
+    private volatile int value;
+
+    static {
+        try {
+            // 获取内存中value字段的偏移值
+            valueOffset = unsafe.objectFieldOffset
+                    (CasLock.class.getDeclaredField("value"));
+        } catch (Exception ex) { throw new Error(ex); }
+    }
+
+    public final boolean compareAndSet(int expect, int update) {
+        return unsafe.compareAndSwapInt(this, valueOffset, expect, update);
+    }
+
+    /**
+     * 使用乐观锁更新value字段的值
+     */
+    public void incrValue() {
+
+        int old;
+
+        do {
+            // 读取旧值（即预期的值）
+            old = value;
+        } while (!compareAndSet(old, old + 1));
+    }
+
+    public int getValue() {
+        return value;
+    }
+
+    public static Unsafe getUnsafe() {
+        try {
+            Field field = Unsafe.class.getDeclaredField("theUnsafe");
+            field.setAccessible(true);
+            return (Unsafe)field.get(null);
+
+        } catch (Exception e) {
+        }
+        return null;
+    }
+}
+```
+
+测试代码如下：
+
+```java
+/**
+ * @author huangy on 2020-04-12
+ */
+public class CasDemo {
+
+    public static void main(String[] args) throws Exception {
+
+        CasLock casLock = new CasLock();
+
+        Thread  t1 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                for (int i = 0; i < 10000; i++) {
+                    casLock.incrValue();
+                }
+            }
+        });
+
+        Thread  t2 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                for (int i = 0; i < 10000; i++) {
+                    casLock.incrValue();
+                }
+            }
+        });
+
+        t1.start();
+        t2.start();
+
+        t1.join();
+        t2.join();
+
+        System.out.println(casLock.getValue());
+    }
+
+}
+```
+
+
+
+
+
+
 
 
 
@@ -109,6 +240,16 @@ JVM会根据当前处理器的类型来决定是否为cmpxchg指令增加lock前
 - 把写缓冲区中的所有数据刷到主内存中
 
 上述几条规则，足以让CAS实现volatile读和volatile写的内存语义。
+
+
+
+<br/>
+
+
+
+
+
+
 
 
 

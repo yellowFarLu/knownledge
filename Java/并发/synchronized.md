@@ -1,5 +1,7 @@
 # synchronized
 
+
+
 传统的锁（也就是下文要说的重量级锁）依赖于系统的同步函数，在linux上使用`mutex`互斥锁，这些同步函数都涉及到**用户态和内核态的切换、进程的上下文切换，成本较高**。对于加了`synchronized`关键字但**运行时并没有多线程竞争，或两个线程接近于交替执行的情况**，使用传统锁机制无疑效率是会比较低的。
 
 
@@ -303,7 +305,7 @@ HotSpot的作者经研究发现，大多数情况下，锁不仅不存在多线�
 - ReentrantLock支持中断
 - ReentrantLock支持公平锁，也就是按照FIFO的顺序获取锁
 - ReentrantLock支持绑定Condition对象
-- 在资源竞争不是很激烈的情况下，synchronize使用的是偏向锁，效率较高。而ReentrantLock总是会阻塞线程。
+- **在没有竞争的情况下，synchronize使用的是偏向锁，效率较高。而ReentrantLock总是会获取锁**
 
 
 

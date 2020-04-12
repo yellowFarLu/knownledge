@@ -1,5 +1,11 @@
 # PriorityBlockingQueue
 
+
+
+## 概述
+
+PriorityBlockingQueue是一个按优先级排序的队列，可以按照元素的自然顺序也可以按照自定义顺序。
+
 `PriorityBlockingQueue` 底层是个最小堆。
 
 当存储元素的数组满时，**插入操作不会阻塞**，而是扩容数组；

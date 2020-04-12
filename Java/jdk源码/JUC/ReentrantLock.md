@@ -2,6 +2,31 @@
 
 
 
+## 概述
+
+ReentrantLock是一个可重入的互斥锁，是实现了AQS的同步器。
+
+ReentrantLock中state表示**持有锁的线程已重复获取该锁的次数**。初始时state=0，表示未锁定状态，当线程A调用lock()方法，使得资源对象被锁定。其他线程再对该资源进行lock()，就会失败。当时线程A可以自己继续lock()，lock()一次，state字段值增加1。调用lock方法多少次，就要调用多少次unlock方法，资源才会释放。
+
+
+
+此类的构造方法提供一个可选的公平参数，默认是非公平的。公平与非公平有何区别**，**所谓
+
+- **公平**就是严格按照FIFO的顺序获取锁
+- **非公平**可以插队，这也是默认的
+
+ReentrantLock属于独占锁，只有持有锁的线程能访问数据
+
+等待可中断：当持有锁的线程长期不释放锁时，等待锁的线程可以选择放弃等待，改为处理其他事情
+
+锁绑定多个条件：一个ReentrantLock对象可以同时绑定多个Condition对象。
+
+Condition对象：用于管理那些已经获得了锁，但是却不满足往下执行条件的线程
+
+ReentrantLock是唯一实现了Lock接口的类，并且ReentrantLock提供了更多的方法。
+
+
+
 ##源码
 
 ### 构造器
@@ -137,6 +162,48 @@ public static void main(String[] args) throws Exception {
         t3.join();
     }
 ```
+
+
+
+
+
+## 实战
+
+```java
+class Outputter1 {  
+
+    private Lock lock = new ReentrantLock();// 锁对象  
+
+ 
+
+    public void output(String name) {         
+
+        lock.lock();      // 得到锁  
+
+        try {  
+
+            for(int i = 0; i < name.length(); i++) {  
+
+                System.out.print(name.charAt(i));  
+
+            }  
+
+        } finally {  
+
+            lock.unlock();// 释放锁  
+
+        }  
+
+    }  
+
+}  
+```
+
+需要注意的是，用sychronized修饰的方法或者语句块在代码执行完之后锁自动释放，而是用Lock需要我们手动释放锁，所以为了保证锁最终被释放(发生异常情况)，**要把同步代码块放在try内**，释放锁放在finally内！
+
+**得到锁的操作要放在try前面**，因为如果放到try代码块里，若等待过程中响应中断，导致finally的释放锁语句执行，会尝试释放还没有得到的锁，抛出IllegalMonitorStateException异常
+
+
 
 
 

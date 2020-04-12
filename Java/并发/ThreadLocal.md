@@ -40,7 +40,9 @@ ThreadLocal在ThreadLocalMap中是以一个弱引用身份被Entry中的Key引�
 
 这个时候就会出现Entry中Key已经被回收，出现一个null Key的情况，外部读取ThreadLocalMap中的元素是无法通过null Key来找到Value的。因此如果当前线程的生命周期很长，一直存在，那么其内部的ThreadLocalMap对象也一直生存下来，这些null key就存在一条强引用链的关系：Thread --> ThreadLocalMap-->Entry-->Value，这条强引用链会导致Entry不会回收，Value也不会回收，但Entry中的Key却已经被回收的情况，造成内存泄漏。
 
-但是JVM团队已经考虑到这样的情况，并做了一些措施来保证ThreadLocal尽量不会内存泄漏：在ThreadLocal的get()、set()、remove()方法调用的时候会清除掉线程ThreadLocalMap中所有Entry中Key为null的Value，并将整个Entry设置为null，利于下次内存回收。
+但是JVM团队已经考虑到这样的情况，并做了一些措施来保证ThreadLocal尽量不会内存泄漏：
+
+- 在ThreadLocal的get()、set()、remove()方法调用的时候会清除掉线程ThreadLocalMap中**所有Entry中Key为null的Value，并将整个Entry设置为null，利于下次内存回收Entry、value。**
 
 
 
@@ -78,11 +80,23 @@ private static final int HASH_INCREMENT = 0x61c88647;
 
 
 
+## 使用场景
+
+常用于同一次请求的参数传递。比如说把身份信息埋到ThreadLocal中，然后该请求的所有接口都可以获取到这个身份信息。
+
+
+
+
+
 ## 问题
 
 **ThreadLocal时要注意什么？比如说内存泄漏?**
 
-需要主动调用remove()方法释放无用的内存。原因查看上面的内存泄漏
+需要主动调用remove()方法释放无用的内存，原因查看上面的内存泄漏。
+
+
+
+
 
 
 

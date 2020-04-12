@@ -2,7 +2,9 @@
 
 ArrayBlockingQueue的内部是通过一个可重入锁ReentrantLock和两个Condition条件对象来实现阻塞。
 
-添加元素和删除元素使用通一把锁。
+**添加元素和删除元素使用通一把锁。**
+
+
 
 
 
@@ -12,6 +14,8 @@ ArrayBlockingQueue的内部是通过一个可重入锁ReentrantLock和两个Cond
 - offer()：尝试添加队列到队列，无论成功、失败都直接返回
 - put()：添加队列到队列，队列满则会一直阻塞
 - 所有插入元素操作，都会先获取锁
+
+
 
 
 

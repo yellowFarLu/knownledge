@@ -309,7 +309,7 @@ emoveEldestEntry() 默认为 false，如果需要让它为 true，需要继承 L
 
 ## 实现LRU
 
-使用LinkedHashMap可以实现LRU算法，因为LinkedHashMap可以设置accessOrder=true，让被访问的元素移动到双向链表尾部，那么双向链表头部就是最近最少被访问的。如果发现数量超过限制了，就删除双向链表头部的元素。
+使用LinkedHashMap可以实现LRU算法，因为LinkedHashMap可以**设置按照访问顺序来遍历元素，让被访问的元素移动到双向链表尾部，那么双向链表头部就是最近最少被访问的。如果发现数量超过限制了，就删除双向链表头部的元素。**
 
 下面演示一下如何使用LinkedHashMap实现LRU算法。
 
@@ -400,6 +400,132 @@ public class LinkedHashMapDemo {
 ```
 
 
+
+
+
+### 实现LRU的其他方式
+
+使用链表LinkedList来实现LRU，规定头部是最近最少访问的元素。
+
+- 当访问一个元素的时候，判断该元素在不在链表中
+- 如果不在，并且链表个数没有超过限制，则加入链表尾部
+- 如果链表元素个数超过了限制，则删掉链表头部元素，元素加到链表尾部
+- 如果元素在链表中，则删除该元素，并且加入链表尾部。
+
+```java
+import java.util.LinkedList;
+import java.util.List;
+
+/**
+ * 通过链表实现LRU算法
+ * @author huangy on 2020-04-11
+ */
+public class LruByList {
+
+    /**
+     * 缓存长度限制
+     */
+    private static final Integer MAX_COUNT = 3;
+
+    /*
+     * LRU缓存
+     */
+    private static final List<Node> cache = new LinkedList<>();
+
+    public Integer getValueFromCache(String key) {
+        Node tem = getNodeByKey(key);
+
+        if (tem == null) {
+
+            tem = new Node();
+            tem.key = key;
+            tem.value = getValueFromDB(key);
+
+            if (cache.size() < MAX_COUNT) {
+                cache.add(tem);
+
+            } else  {
+                cache.remove(0);
+                cache.add(tem);
+            }
+
+        } else {
+            cache.remove(tem);
+            cache.add(tem);
+        }
+
+        return tem.value;
+    }
+
+    // 穿过缓存，从数据库读取数据
+    private Integer getValueFromDB(String key) {
+        return Integer.parseInt(key);
+    }
+
+    private Node getNodeByKey(String key) {
+        for (Node node : cache) {
+            if (node.key.equals(key)) {
+                return node;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 查看缓存情况
+     */
+    public void viewCache() {
+        System.out.println(cache);
+    }
+
+    public static void main(String[] args) {
+        LruByList lruByList = new LruByList();
+
+        for (int i = 0; i < 10; i++) {
+            lruByList.getValueFromCache(String.valueOf(i));
+        }
+
+        lruByList.viewCache();
+    }
+}
+
+class Node {
+
+    String key;
+
+    int value;
+
+    @Override
+    public boolean equals(Object obj) {
+
+        if (obj instanceof Node) {
+            Node otherNode = (Node)obj;
+            return key.equals(otherNode.key);
+        }
+
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return key.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "Node{" +
+                "key='" + key + '\'' +
+                ", value=" + value +
+                '}';
+    }
+}
+```
+
+
+
+### 对比
+
+链表实现LRU 和 LinkedHashMap实现LRU，明显是LinkedHashMap的效率更加优化，因为LinkedHashMap在查找元素是否在缓存中的时候，支持时间复杂度O(1)的查找效率，而链表是查找效率是O(n)。
 
 
 
