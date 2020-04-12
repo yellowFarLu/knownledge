@@ -6,13 +6,13 @@
 
 字符串 string 是 Redis 最简单的数据结构。Redis 所有的数据结构都是以唯一的 key 字符串作为名称，然后通过这个唯一 key 值来获取相应的 value 数据。不同类型的数据结构的差异就在于 value 的结构不一样。
 
-![16458d666d851a12](https://ws2.sinaimg.cn/large/006tNbRwgy1fxc3u256exg30b402iq2v.gif)
+![16458d666d851a12](https://tva1.sinaimg.cn/large/007S8ZIlgy1gdr4rvi5yxg30b402iq2v.gif)
 
 
 
 字符串结构使用非常广泛，一个常见的用途就是缓存用户信息。我们将用户信息结构体使用 JSON 序列化成字符串，然后将序列化后的字符串塞进 Redis 来缓存。同样，取用户信息会经过一次反序列化的过程。
 
-![164caaff402d2617](https://ws1.sinaimg.cn/large/006tNbRwgy1fxc3v27fi0j30fw04pt8m.jpg)
+<img src="https://tva1.sinaimg.cn/large/007S8ZIlgy1gdr4t5wihsj30qq0aejsf.jpg" alt="image-20200412175335670" style="zoom:70%;" />
 
 Redis 的字符串是动态字符串，是可以修改的字符串，内部结构实现上类似于 Java 的 ArrayList，采用预分配冗余空间的方式来减少内存的频繁分配，如图中所示，内部为当前字符串实际分配的空间 capacity 一般要高于实际字符串长度 len。当字符串长度小于 1M 时，扩容都是加倍现有的空间，如果超过 1M，扩容时一次只会多扩 1M 的空间。需要注意的是字符串最大长度为 512M。
 
@@ -110,12 +110,20 @@ incr在原来的基础上增加1，incrby是在原来的基础上增加n
 
 
 
+<br/>
+
+
+
+
+
+
+
 ### list (列表)
 
 Redis 的列表相当于 Java 语言里面的 LinkedList，注意它是链表而不是数组。这意味着 list 的插入和删除操作非常快，时间复杂度为 O(1)，但是索引定位很慢，时间复杂度为 O(n)，这点让人非常意外。
 当列表弹出了最后一个元素之后，该数据结构自动被删除，内存被回收。
 
-![img](https://ws1.sinaimg.cn/large/006tNbRwgy1fxc3vttqusg30dg03ctbr.gif)
+![img](https://tva1.sinaimg.cn/large/007S8ZIlgy1gdr4x70rhwg30dg03ctbr.gif)
 
 Redis 的列表结构常用来做异步队列使用。将需要延后处理的任务结构体序列化成字符串塞进 Redis 的列表，另一个线程从这个列表中轮询数据进行处理。
 
@@ -182,10 +190,22 @@ index 可以为负数，index=-1表示倒数第一个元素，同样index=-2表�
 
 #### 快速列表
 
-![Snip20181118_2](https://ws2.sinaimg.cn/large/006tNbRwgy1fxc48ffg83j31z406q0tc.jpg)
+![image-20200412175829970](https://tva1.sinaimg.cn/large/007S8ZIlgy1gdr4y8yiz6j310m052aav.jpg)
 
 如果再深入一点，你会发现 Redis 底层存储的还不是一个简单的 linkedlist，而是称之为快速链表 quicklist 的一个结构。
-首先在列表元素较少的情况下会使用一块连续的内存存储，这个结构是 ziplist，也即是压缩列表。它将所有的元素紧挨着一起存储，分配的是一块连续的内存。当数据量比较多的时候才会改成 quicklist。因为普通的链表需要的附加指针空间太大，会比较浪费空间，而且会加重内存的碎片化。比如这个列表里存的只是 int 类型的数据，结构上还需要两个额外的指针 prev 和 next 。所以 Redis 将链表和 ziplist 结合起来组成了 quicklist。也就是将多个 ziplist 使用双向指针串起来使用。这样既满足了快速的插入删除性能，又不会出现太大的空间冗余。
+首先在元素较少的情况下会使用一块连续的内存存储，这个结构是 ziplist，也即是压缩列表。它将所有的元素紧挨着一起存储，分配的是一块连续的内存。
+
+当数据量比较多的时候才会改成 quicklist。
+
+因为普通的链表需要的**附加指针空间太大，会比较浪费空间，而且会加重内存的碎片化**。比如这个列表里存的只是 int 类型的数据，结构上还需要两个额外的指针 prev 和 next 。所以 Redis 将链表和 ziplist 结合起来组成了 quicklist。也就是将多个 ziplist 使用双向指针串起来使用。这样既满足了快速的插入删除性能，又不会出现太大的空间冗余。
+
+
+
+
+
+<br/>
+
+
 
 
 
@@ -193,19 +213,19 @@ index 可以为负数，index=-1表示倒数第一个元素，同样index=-2表�
 
 Redis 的字典相当于 Java 语言里面的 HashMap，它是无序字典。内部实现结构上同 Java 的 HashMap 也是一致的，同样的数组 + 链表二维结构。第一维 hash 的数组位置碰撞时，就会将碰撞的元素使用链表串接起来。
 
-![Snip20181118_3](https://ws2.sinaimg.cn/large/006tNbRwgy1fxc4c0tbt5j30wo0fi74m.jpg)
+![image-20200412180054387](https://tva1.sinaimg.cn/large/007S8ZIlgy1gdr50rf7i4j30ic0ekgmz.jpg)
 
 不同的是，Redis 的字典的值只能是字符串，另外它们 rehash 的方式不一样，因为 Java 的 HashMap 在字典很大时，rehash 是个耗时的操作，需要一次性全部 rehash。Redis 为了高性能，不能堵塞服务，所以采用了渐进式 rehash 策略。
 
-![Snip20181118_4](https://ws4.sinaimg.cn/large/006tNbRwgy1fxc4dw83xjj31z00jmq4n.jpg)
+![image-20200412180120648](https://tva1.sinaimg.cn/large/007S8ZIlgy1gdr517sd4vj31220bigo2.jpg)
 
 渐进式 rehash 会在 rehash 的同时，保留新旧两个 hash 结构，查询时会同时查询两个 hash 结构，然后在后续的定时任务中以及 hash 操作指令中，循序渐进地将旧 hash 的内容一点点迁移到新的 hash 结构中。当搬迁完成了，就会使用新的hash结构取而代之。当 旧hash 移除了最后一个元素之后，该数据结构自动被删除，内存被回收。
 
 
 
-![img](https://ws2.sinaimg.cn/large/006tNbRwgy1fxc4glic4fg30ci04gtb5.gif)
-
 hash 结构也可以用来存储用户信息，不同于字符串一次性需要全部序列化整个对象，hash 可以对用户结构中的每个字段单独存储。这样当我们需要获取用户信息时可以进行部分获取。而以整个字符串的形式去保存用户信息的话就只能一次性全部读取，这样就会比较浪费网络流量。
+
+![](https://tva1.sinaimg.cn/large/007S8ZIlgy1gdr5238tlrg30ci04gtb5.gif)
 
 hash 也有缺点，hash 结构的存储消耗要高于单个字符串，到底该使用 hash 还是字符串，需要根据实际情况再三权衡。
 
@@ -251,13 +271,27 @@ hash 也有缺点，hash 结构的存储消耗要高于单个字符串，到底�
 
 
 
+
+
+
+
+<br/>
+
+
+
+
+
+
+
+
+
 ### set (集合)
 
 Redis 的集合相当于 Java 语言里面的 HashSet，它内部的键值对是无序的唯一的。它的内部实现相当于一个特殊的字典，字典中所有的 value 都是一个值`NULL`。
 
 当集合中最后一个元素移除之后，数据结构自动删除，内存被回收。
 
-![img](https://ws4.sinaimg.cn/large/006tNbRwgy1fxcastiixhg30dg05kn0c.gif)
+![](https://tva1.sinaimg.cn/large/007S8ZIlgy1gdr52zxt91g30dg05kn0c.gif)
 
 set 结构可以用来存储活动中奖的用户 ID，因为有去重功能，可以保证同一个用户不会中奖两次。
 
@@ -286,12 +320,22 @@ set 结构可以用来存储活动中奖的用户 ID，因为有去重功能，�
 
 
 
+<br/>
+
+
+
+
+
+
+
+
+
 ### zset (有序集合)
 
-zset 可能是 Redis 提供的最为特色的数据结构，它也是在面试中面试官最爱问的数据结构。它类似于 Java 的 SortedSet 和 HashMap 的结合体，一方面它是一个 set，保证了内部 value 的唯一性，另一方面它可以给每个 value 赋予一个 score，代表这个 value 的排序权重。它的内部实现用的是一种叫做「跳跃列表」的数据结构。
+zset 可能是 Redis 提供的最为特色的数据结构，它也是在面试中面试官最爱问的数据结构。它类似于 Java 的 SortedSet 和 HashMap 的结合体，一方面它是一个 set，保证了内部 value 的唯一性，另一方面它可以给每个 value 赋予一个 score分数，代表这个 value 的排序权重。它的内部实现用的是一种叫做「跳跃列表」的数据结构。
 zset 中最后一个 value 被移除后，数据结构自动删除，内存被回收。
 
-![img](https://ws1.sinaimg.cn/large/006tNbRwgy1fxcaviyotag30b404g0ub.gif)
+![img](https://tva1.sinaimg.cn/large/007S8ZIlgy1gdr53eiqe6g30b404g0ub.gif)
 
 zset 可以用来存粉丝列表，value 值是粉丝的用户 ID，score 是关注时间。我们可以对粉丝列表按关注时间进行排序。
 zset 还可以用来存储学生的成绩，value 值是学生的 ID，score 是他的考试成绩。我们可以对成绩按分数进行排序就可以得到他的名次。
@@ -338,7 +382,7 @@ zset 内部的排序功能是通过「跳跃列表」数据结构来实现的，
 
 因为 zset 要支持随机的插入和删除，所以它不好使用数组来表示。我们先看一个普通的链表结构。
 
-![Snip20181118_5](https://ws1.sinaimg.cn/large/006tNbRwgy1fxcb0x6hgrj31z206075y.jpg)
+![image-20200412180427753](https://tva1.sinaimg.cn/large/007S8ZIlgy1gdr54ghtvtj30z804eabe.jpg)
 
 我们需要这个链表按照 score 值进行排序。这意味着当有新元素需要插入时，要定位到特定位置的插入点，这样才可以继续保证链表是有序的。通常我们会通过二分查找来找到插入点，但是二分查找的对象必须是数组，只有数组才可以支持快速位置定位，链表做不到，那该怎么办？
 
@@ -346,7 +390,7 @@ zset 内部的排序功能是通过「跳跃列表」数据结构来实现的，
 跳跃列表就是类似于这种层级制，最下面一层所有的元素都会串起来。然后每隔几个元素挑选出一个代表来，再将这几个代表使用另外一级指针串起来。然后在这些代表里再挑出二级代表，再串起来。最终就形成了金字塔结构。
 想想你老家在世界地图中的位置：亚洲-->中国->安徽省->安庆市->枞阳县->汤沟镇->田间村->xxxx号，也是这样一个类似的结构。
 
-![Snip20181118_6](https://ws1.sinaimg.cn/large/006tNbRwgy1fxcb30kd59j31s20cgjsu.jpg)
+![image-20200412180523131](https://tva1.sinaimg.cn/large/007S8ZIlgy1gdr55exhbxj310m084dib.jpg)
 
 「跳跃列表」之所以「跳跃」，是因为内部的元素可能「身兼数职」，比如上图中间的这个元素，同时处于 L0、L1 和 L2 层，可以快速在不同层次之间进行「跳跃」。
 定位插入点时，先在顶层进行定位，然后下潜到下一级定位，一直下潜到最底层找到合适的位置，将新元素插进去。你也许会问，那新插入的元素如何才有机会「身兼数职」呢？
@@ -356,17 +400,26 @@ zset 内部的排序功能是通过「跳跃列表」数据结构来实现的，
 
 
 
-#### 容器型数据结构的通用规则
+<br/>
+
+
+
+## 容器型数据结构的通用规则
 
 list/set/hash/zset 这四种数据结构是容器型数据结构，它们共享下面两条通用规则：
-create if not exists
-如果容器不存在，那就创建一个，再进行操作。比如 rpush 操作刚开始是没有列表的，Redis 就会自动创建一个，然后再 rpush 进去新元素。
-drop if no elements
-如果容器里元素没有了，那么立即删除元素，释放内存。这意味着 lpop 操作到最后一个元素，列表就消失了。
+
+1. create if not exists
+   如果容器不存在，那就创建一个，再进行操作。比如 rpush 操作刚开始是没有列表的，Redis 就会自动创建一个，然后再 rpush 进去新元素。
+2. drop if no elements
+   如果容器里元素没有了，那么立即删除元素，释放内存。这意味着 lpop 操作到最后一个元素，列表就消失了。
 
 
 
-#### 过期时间
+<br/>
+
+
+
+## 过期时间
 
 Redis 所有的数据结构都可以设置过期时间，时间到了，Redis 会自动删除相应的对象。需要注意的是过期是以对象为单位，比如一个 hash 结构的过期是整个 hash 对象的过期，而不是其中的某个子 key。
 还有一个需要特别注意的地方是如果一个字符串已经设置了过期时间，然后你调用了 set 方法修改了它，它的过期时间会消失。

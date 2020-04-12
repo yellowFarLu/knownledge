@@ -374,6 +374,7 @@ private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<Str
 ### BeanPostProcessor 与 BeanFactoryPostProcessor
 
 - BeanFactoryPostProcessor：
+  
   - BeanFactory后置处理器，是对BeanDefinition进行修改。
   
 - BeanFactoryPostProcessor接口是针对bean容器的，它的实现类可以在**当前BeanFactory初始化（spring容器加载bean定义文件）后，bean实例化之前**修改BeanDefinition，达到影响之后实例化bean的效果。
