@@ -111,8 +111,8 @@ TCP是个“流”协议，所谓流，就是没有界限的一串数据。TCP�
 
 该模型相比第二种模型，是将Reactor分成两部分：
 
-- mainReactor负责监听server socket，accept新连接；并将建立的socket分派给subReactor。
-- subReactor负责多路分离已连接的socket，读写网络数据，对业务处理功能，其扔给worker线程池完成。通常，subReactor个数上可与CPU个数等同。
+- **mainReactor负责监听server socket，accept新连接；并将建立的socket分派给subReactor。**
+- subReactor**负责多路分离已连接的socket，读写网络数据**，对业务处理功能，其扔给worker线程池完成。通常，subReactor个数上可与CPU个数等同。
 
 利用主从NIO线程模型，可以解决一个服务端监听线程无法有效处理所有客户端连接的性能不足问题，因此，在Netty的官方Demo中，推荐使用该线程模型。
 

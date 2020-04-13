@@ -333,9 +333,51 @@ Java虚拟机中synchronized关键字的实现，按照代价由高到低可以�
 
 
 
+<br/>
+
+
+
 **自旋锁适用于什么场景？**
 
 线程的任务执行时间比较短的场景
+
+<br/>
+
+
+
+**synchronize是可重入的吗？**
+
+是的。每次重新获取对象的监视器锁，计数器+1，退出同步块，计数器减一。
+
+```java
+public class SynDemo {
+
+    public static void main(String[] args) {
+        
+        synchronized (SynDemo.class) {
+            System.out.println("获取第一把锁");
+
+            synchronized (SynDemo.class) {
+                System.out.println("获取第二把锁");
+                System.out.println("证明可重入");
+            }
+
+        }
+    }
+
+}
+
+输出
+获取第一把锁
+获取第二把锁
+证明可重入  
+```
+
+
+
+
+
+
 
 
 
