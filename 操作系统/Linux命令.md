@@ -621,6 +621,14 @@ END 模式指定了处理完所有行之后所需要执行的操作：
 
 
 
+## cut
+
+参考  [cut命令详解](https://www.cnblogs.com/Spiro-K/articles/6361646.html)
+
+
+
+
+
 
 
 
