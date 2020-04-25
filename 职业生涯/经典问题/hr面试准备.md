@@ -238,7 +238,7 @@ CRM工单系统：
 
 主要负责的系统有支付系统、灰度系统、CRM工单系统。
 
-熟悉的技术有Java、Dubbo、Redis、Zookeeper、Spring等。
+熟悉的技术有Java、Dubbo、Redis、Zookeeper、Spring等，熟悉dubbo源码。
 
 
 
