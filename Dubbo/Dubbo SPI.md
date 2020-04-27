@@ -69,6 +69,10 @@ public class SPIMain {
 
 
 
+
+
+
+
 ## Dubbo SPI
 
 Dubbo对JDK SPI进行了扩展，对服务提供者配置文件中的内容进行了改造，**由原来的提供者类的全限定名列表改成了KV形式的列表，这也导致了Dubbo中无法直接使用JDK ServiceLoader**，所以，与之对应的，在Dubbo中有ExtensionLoader。
