@@ -381,7 +381,11 @@ class Reference {
 
 原子更新字段类都是抽象类，每次使用都时候必须使用静态方法newUpdater创建一个更新器。
 
-**原子更新类的字段的必须使用public volatile修饰符**。
+限制：
+
+- **原子更新类的字段的必须使用volatile修饰符**。
+- 字段只能是基础数据类型
+- 只能是实例变量
 
 AtomicIntegerFieldUpdater的例子代码如下：
 
@@ -416,6 +420,31 @@ public class AtomicIntegerFieldUpdaterTest {
 	}
 }
 ```
+
+```java
+public class AtomicIntegerFieldUpdaterTest {
+
+    // 如果使用private修饰符，必须在本类中使用AtomicIntegerFieldUpdater原子更新字段
+    private volatile int old;
+
+    public AtomicIntegerFieldUpdaterTest(int old) {
+        this.old = old;
+    }
+
+    private static AtomicIntegerFieldUpdater<AtomicIntegerFieldUpdaterTest> a = AtomicIntegerFieldUpdater
+            .newUpdater(AtomicIntegerFieldUpdaterTest.class, "old");
+
+    public static void main(String[] args) {
+        AtomicIntegerFieldUpdaterTest conan = new AtomicIntegerFieldUpdaterTest( 10);
+        System.out.println(a.getAndIncrement(conan));
+        System.out.println(a.get(conan));
+    }
+}
+```
+
+
+
+
 
 
 
