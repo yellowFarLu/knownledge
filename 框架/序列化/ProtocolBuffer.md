@@ -168,6 +168,10 @@ public class ProtoBufUtilTest {
 
 ## 原理
 
+Protocol Buffer将数据结构以.proto文件进行描述，通过代码生成工具可以生成对应数据结构的POJO对象和Protobuf相关的方法和属性。
+
+Protobuf使用二进制编码，在空间和性能上有更大的优势。
+
 
 
 ### 编码

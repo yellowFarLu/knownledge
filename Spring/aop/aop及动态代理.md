@@ -48,6 +48,26 @@
 
 
 
+## 动态代理概念
+
+- 关注点：软件系统可以看成是由一组关注点组成的，其中，直接的业务关注点，是直切关注点。而为直切关注点提供服务的，就是横切关注点。
+- 切面：切面是通知和切点的集合，通知和切点共同定义了切面的全部功能——它是什么，在何时何处完成其功能。
+- 通知：Advice（通知）定义了切面是什么以及何时使用。Spring 切面可应用的 5 种通知类型：
+  - Before——在方法调用之前调用通知
+  - After——在方法完成之后调用通知，无论方法执行成功与否
+  - After-returning——在方法执行成功之后调用通知
+  - After-throwing——在方法抛出异常后进行通知
+  - Around——通知包裹了被通知的方法，在被通知的方法调用之前和调用之后执行自定义的行为
+- 连接点：连接点是一个应用执行过程中能够插入一个切面的点。
+  - 连接点可以是调用方法时、抛出异常时、甚至修改字段时。
+  - 切面代码可以利用这些点插入到应用的正规流程中。
+  - 程序执行过程中能够应用通知的所有点。
+- 切点：如果通知定义了“什么”和“何时”。那么切点就定义了“何处”。切点会匹配通知所要织入的一个或者多个连接点。通过切点定义需要增强的方法集合，这些集合的选取可以按照一定规则来完成，比如说正则表达式或者方法名。
+  - 作用：定义通知被应用的位置（在哪些连接点）
+- 织入：织入是将切面应用到目标对象来创建的代理对象过程。
+
+
+
 
 
 ## Java动态代理
@@ -290,7 +310,20 @@ ASM \> Javassist Bytecode \> Cglib \> JDK \> Javassist ProxyFactory
 
 ## Spring Aop
 
-spring开启动态代理的配置
+
+
+### 概述
+
+spring中代理实现代码增强几种方式：
+
+- 方式一：@Aspect注解 或者 XML配置Aspect
+  - 我们一般使用这个
+- 方式二：ProxyFactoryBean
+- 方式三：编程方式注入advisor（ProxyFactory）
+
+
+
+spring开启动态代理的配置：
 
 ```xml
 <aop:aspectj-autoproxy/>
@@ -321,7 +354,7 @@ spring开启动态代理的配置
 
 
 
-### 控制aop执行顺序
+### 控制Aop执行顺序
 
 使用order参数，如:
 
@@ -371,6 +404,20 @@ spring开启动态代理的配置
 
 
 
+### 源码流程
+
+- 在ProxyFactoryBean的getObject方法获取Bean的时候
+  - 生成拦截器链
+  - 根据JDK动态代理或者CGLib来把目标对象生成对应的代理对象
+- 这时候注入的就是代理对象了
+- 在调用目标方法的时候
+  - 如果是JDK动态代理生成的代理对象，则回调invoke方法，在该方法中获取所有拦截器，并且逐个调用拦截器，最后调用目标方法
+  - 如果是CGLib生成的代理对象，会回调DynamicAdvisedInterceptor.intercept()方法，同样的，在该方法中获取所有拦截器，并且逐个调用拦截器，最后调用目标方法。
+
+
+
+
+
 
 
 
@@ -383,6 +430,10 @@ spring开启动态代理的配置
     和CGLIB，Javassist，ASM）](https://blog.csdn.net/luanlouis/article/details/24589193)
 
 - [Java动态代理分析](https://blog.csdn.net/danchu/article/details/70146985)
+
+- [AOP相关概念](https://blog.csdn.net/garfielder007/article/details/78057107)
+
+- [ProxyFactoryBean示例](https://blog.csdn.net/c5113620/article/details/83578114)
 
 
 
