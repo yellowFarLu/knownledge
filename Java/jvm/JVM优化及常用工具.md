@@ -34,10 +34,17 @@
 
 ```java
 // 放一些参数在这里，方便复制使用
-
 -XX:+UseConcMarkSweepGC  // 使用CMS收集器
 -XX:+UseG1GC     // 使用G1收集器  
 ```
+
+
+
+
+
+
+
+
 
 
 
@@ -47,7 +54,7 @@
 
 
 
-## 情况
+### 常用参数
 
 1、一般来说，当survivor区不够大或者占用量达到50%，就会把一些对象放到老年区。通过设置合理的eden区，survivor区及使用率，**可以将年轻对象保存在年轻代**，从而避免full GC，使用-Xmn设置年轻代的大小
 
@@ -89,7 +96,31 @@
 
 8、使用非占用的垃圾收集器。-XX:+UseConcMarkSweepGC老年代使用CMS收集器降低停顿。
 
+
+
 9、-XXSurvivorRatio=3，表示survivor:eden = 2:3
+
+
+
+10、有朋友可能问了，不是所有的故障当时我们都在场的，无法及时dump，那也简单
+
+```java
+-XX:+HeapDumpOnOutOfMemoryError
+```
+
+配置这个JVM参数之后，oom的时候会自动dump的，到时候拿快照分析一波就好了。
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
