@@ -390,3 +390,5 @@ public class TestMain {
 
 [http转dubbo调用（泛化方式）](https://blog.csdn.net/yufeng702/article/details/72911575)
 
+[向达的http转dubbo源码]
+
