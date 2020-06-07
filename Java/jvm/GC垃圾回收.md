@@ -120,7 +120,7 @@ Java虚拟机规范确实说过可以不在方法区中实现垃圾收集，方�
 public Class<?> getDeclaringClass() throws SecurityException {
         final Class<?> candidate = getDeclaringClass0();
   /*
-  * 反射里面使用到ClassLoader，因此要把ClassLoader干掉，才能保证没有地方可以通过反射调用到Class类。
+  * 反射里面使用到ClassLoader，因此要把ClassLoader回收了，才能保证没有地方可以通过反射调用到这个类的Class对象。
   * 然后当类的实例都会被回收了，并且该类没有在任何地方被引用到了，那么这个类就可以被回收了
   */
   if (candidate != null)

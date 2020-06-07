@@ -376,6 +376,10 @@ public class TestMain {
 
 
 
+## 总结
+
+我们目前的http转dubbo，是自己写了一套类似SpringMVC的代码，以类名路径 + 方法名作为url，当进行请求的时候，通过url找到对应类的对应方法进行执行。
+
 
 
 
