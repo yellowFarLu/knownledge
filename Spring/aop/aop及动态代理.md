@@ -202,13 +202,13 @@ public static Object newProxyInstance(ClassLoader loader,Class<?>[] interfaces,I
 
 
 
-**动态代理的优点**
+**JDK动态代理的优点**
 
 -   动态代理与静态代理相比较，最大的好处是接口中声明的所有方法都被转移到调用处理器一个集中的方法中处理（InvocationHandler.invoke）。这样，在接口方法数量比较多的时候，我们可以进行灵活处理，而不需要像静态代理那样每一个方法进行中转
 
 
 
-**动态代理的不足**
+**JDK动态代理的不足**
 
 -   诚然，Proxy已经设计得非常优美，但是还是有一点点小小的遗憾之处，那就是它**仅支持
     接口interface代理**，**因为它的设计注定了这个遗憾**。回想一下那些动态生成的代理类的继承关系图，它们已经注定有一个共同的父类叫Proxy。Java 的继承机制注定了这些动态代理类们无法实现对 class
@@ -222,7 +222,7 @@ public static Object newProxyInstance(ClassLoader loader,Class<?>[] interfaces,I
 
 **CGLib是针对类来实现代理的**，基于ASM的包装，他的原理是**对指定的目标类生成一个子类，并覆盖其中方法实现增强，但因为采用的是继承，所以不能对final修饰的类进行代理**。
 
-GClib也可以为接口创建动态代理类，是生成一个代理类实现该接口的方法，参考[CGlib实现代理](https://blog.csdn.net/starryninglong/article/details/89737419#jdk_1)
+CGlib也可以为接口创建动态代理类，是生成一个代理类实现该接口的方法，参考[CGlib实现代理](https://blog.csdn.net/starryninglong/article/details/89737419#jdk_1)
 
 
 

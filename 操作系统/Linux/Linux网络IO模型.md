@@ -96,3 +96,13 @@ IO多路复用的主要场景如下：
 
 ![image-20200503152538027](https://tva1.sinaimg.cn/large/007S8ZIlgy1gefajo3abdj30wo0isgpm.jpg)
 
+
+
+
+
+## 参考
+
+《Netty权威指南》
+
+[IO模型](https://blog.csdn.net/u011521382/article/details/81040893)
+

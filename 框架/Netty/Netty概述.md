@@ -10,6 +10,8 @@ Netty是一个高性能、异步事件驱动的NIO框架，它提供了对TCP、
 
 Netty需要学习的内容: 编解码器、TCP粘包/拆包及Netty如何解决、ByteBuf、Channel和Unsafe、ChannelPipeline和ChannelHandler、EventLoop和EventLoopGroup、Future等。
 
+Netty使用的IO模型是异步IO（AIO）。
+
 
 
 
@@ -324,7 +326,7 @@ Netty提供的经过扩展的Buffer相对NIO中的有个许多优势，作为数
 2. 如果使用传统的堆内存（HEAP BUFFERS）进行Socket读写，JVM会将堆内存Buffer拷贝一份到直接内存中，然后才写入Socket中。相比于堆外直接内存，消息在发送过程中多了一次缓冲区的内存拷贝。
 3. Netty提供了组合Buffer对象，可以聚合多个ByteBuffer对象，用户可以像操作一个Buffer那样方便的对组合Buffer进行操作，避免了传统通过内存拷贝的方式将几个小Buffer合并成一个大的Buffer。
 4. **Netty的文件传输采用了transferTo方法**，它可以直接将文件缓冲区的数据发送到目标Channel，避免了传统通过循环write方式导致的内存拷贝问题。
-   1. 本来数据是从内核——》用户空间——》socket缓冲区，使用transferTo之后，数据直接从内核——》socket缓冲区。
+   1. 本来数据是从内核——》用户空间——》socket缓冲区，使用transferTo之后，数据直接从内核——》socket缓冲区。从而提高性能。
 
 
 
@@ -350,6 +352,26 @@ Netty其实本质上就是Reactor模式的实现，Selector作为多路复用器
 但是和一般的Reactor不同的是，Netty使用串行化实现，并在Pipeline中使用了责任链模式。
 
 Netty中的buffer相对有NIO中的buffer又做了一些优化，大大提高了性能。
+
+
+
+
+
+## 问题
+
+
+
+**netty如何避免的NIO空循环?**
+
+当应用程序发起IO请求的时候，应用程序立即返回，有内核等待IO请求，并且得到数据以后，将数据写入应用程序的缓冲区，然后再通知应用程序进行读取，从而避免NIO空循环。
+
+
+
+
+
+
+
+
 
 
 
