@@ -310,6 +310,18 @@ final Node<K,V>[] resize() {
 
 
 
+**解决hash冲突的方法？**
+
+1. 链式地址法。 这个也是hashMap采用的方法
+2. 开放定址法（比如说线性探测再散列）
+3. 再哈希法
+
+
+
+
+
+
+
 
 
 ## 参考
@@ -333,3 +345,6 @@ https://juejin.im/post/5d412a5be51d45620e0b99af
 [hashMap1.7源码分析](https://www.jianshu.com/p/e5c8a814c0ca)
 
 [为什么Java8中HashMap链表使用红黑树而不是AVL树](https://blog.csdn.net/21aspnet/article/details/88939297)
+
+[解决hash冲突的四种方法](https://blog.csdn.net/yeiweilan/article/details/73412438)
+
