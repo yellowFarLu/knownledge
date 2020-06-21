@@ -248,6 +248,16 @@ jmap -dump:format=b,file=my.bin 5426
 
 
 
+**命令行触发gc**
+
+```java
+jmap -histo:live <pid>
+```
+
+
+
+
+
 
 
 ### jhat
@@ -378,5 +388,5 @@ https://blog.csdn.net/u010663871/article/details/73603460
 
 https://blog.csdn.net/softwave/article/details/6238747
 
-
+[查看GC日志的JVM参数](https://blog.csdn.net/liao0801_123/article/details/83022647)
 
