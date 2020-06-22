@@ -1,8 +1,8 @@
-#ThreadLocal
+# ThreadLocal
 
 
 
-##概念
+## 概念
 
 ThreadLocal，即线程变量，是一个以ThreadLocal对象为键，任意对象为值的存储结构。这个结构被附带在线程上，也就是说一个线程可以通过ThreadLocal对象查询到绑定在这个线程上的一个值。
 
@@ -10,7 +10,7 @@ ThreadLocal，即线程变量，是一个以ThreadLocal对象为键，任意对�
 
 
 
-##原理
+## 原理
 
 关于ThreadLocal的原理，理清四个角色关系：Thread，ThreadLocal，ThreadLocalMap，Entry
 
