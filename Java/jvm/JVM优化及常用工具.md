@@ -105,8 +105,12 @@
 10、有朋友可能问了，不是所有的故障当时我们都在场的，无法及时dump，那也简单
 
 ```java
--XX:+HeapDumpOnOutOfMemoryError
+-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/logs/heapdump.hprof
 ```
+
+-XX:+HeapDumpOnOutOfMemoryError 设置当首次遭遇内存溢出时导出此时堆中相关信息
+
+-XX:HeapDumpPath=/tmp/heapdump.hprof 指定导出堆信息时的路径或文件名
 
 配置这个JVM参数之后，oom的时候会自动dump的，到时候拿快照分析一波就好了。
 
