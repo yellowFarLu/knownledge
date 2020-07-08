@@ -232,13 +232,13 @@ CRM工单系统：
 
 **自我介绍**
 
-你好，我叫黄远。2018年毕业于吉林大学珠海学院。
+你好，我叫黄远。2018年毕业。
 
 自从2017年11月开始在纷享销客实习，我的岗位为Java开发工程师。
 
 主要负责的系统有支付系统、灰度系统、CRM工单系统。
 
-熟悉的技术有Java、Dubbo、Redis、Zookeeper、Spring等，熟悉dubbo源码。
+熟悉的技术有Java、Dubbo、Redis、Zookeeper、Spring等，阅读够dubbo源码、常用JDK源码。
 
 
 

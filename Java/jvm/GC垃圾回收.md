@@ -700,7 +700,7 @@ CMS的垃圾清理和用户线程是并行进行的，如果在并行清理的�
 
 **promotion failed的发生原因？**
 
-在发生Minor GC的时候，survivor空间放不下存活对象，然后尝试放到老年代，老年代也放不下，因此发生promotion failed。
+在发生Minor GC的时候，survivor空间放不下存活对象，然后尝试放到老年代，老年代也放不下，因此发生promotion failed。（即分配担保失败）
 
 
 
