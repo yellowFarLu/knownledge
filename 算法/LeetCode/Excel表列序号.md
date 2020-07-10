@@ -18,7 +18,7 @@ https://leetcode-cn.com/problems/excel-sheet-column-number/
 
 复习一下n进制转化为10进制的公式，比如说256这个n进制转化为10进制，则：
 
-10进制整数 = 2\*n^3 + 5\*n^2 + 6\*n^1
+10进制整数 = 2\*n^2 + 5\*n^1 + 6\*n^0
 
 
 
