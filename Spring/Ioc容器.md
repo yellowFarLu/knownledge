@@ -12,7 +12,7 @@
 
 ## IoC容器初始化过程
 
-- **资源定位，资源解析**
+- **资源文件定位，资源解析**
   
    - 找到资源文件，载入。
    - 把资源文件转化成DOM元素
@@ -20,6 +20,7 @@
    
 - **把Bean定义注册到IoC容器中**
 
+   - 把DOM元素解析成Bean定义
    - 把BeanDefinition加入到 org.springframework.beans.factory.support.DefaultListableBeanFactory#**beanDefinitionMap**里面，这个的BeanDefinition相当于类，这时候还没有把该类进行实例化。
    - 关键类：org.springframework.beans.factory.xml.XmlBeanDefinitionReader#registerBeanDefinitions
    - 注册的过程主要是DOM元素转化为BeanDefinition，并且存放到Map中。把DOM元素转化为BeanDefinition主要由NamespaceHandler决定，这里也体现了Spring的扩展性
@@ -41,6 +42,16 @@
    - 调用beanPostProcessor的地方org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsAfterInitialization
 
       
+
+简单来说：
+
+- 找到资源文件
+- 把资源文件的内容转换成DOM元素
+- 把DOM元素转换成Bean定义
+- 把Bean定义注册到Ioc容器中
+- 实例化Bean，这时候会为Bean分配内存空间，执行Bean的构造方法，设置Bean的属性，同时会触发依赖注入
+
+
 
 
 
@@ -189,7 +200,9 @@ ContextLoaderListener 实现了 javax.servlet.ServletContextListener，这个是
 
 ##依赖注入
 
-遍历Ioc容器中的对象，遍历对象的属性，然后如果该属性是对象，则把Ioc容器中的对应对象的引用赋值到属性上。
+遍历Ioc容器中的对象的属性，然后如果该属性是引用类型，则把Ioc容器中的对应对象的引用赋值到属性上。
+
+
 
 ### 构造器注入
 
