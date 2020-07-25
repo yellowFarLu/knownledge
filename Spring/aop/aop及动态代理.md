@@ -386,6 +386,8 @@ spring开启动态代理的配置：
 
 配置了3个aop，程序执行流程如：
 
+小的先执行，最后再执行after
+
 ![Snip20190414_2](https://ws2.sinaimg.cn/large/006tNc79gy1g21ysu4pr3j31b20twwk3.jpg)
 
 
