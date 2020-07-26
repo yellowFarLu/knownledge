@@ -42,6 +42,8 @@ Netty线程模型基于NIO实现，即非阻塞IO及多路复用。在netty中�
 
 
 
+
+
 ## Dubbo 线程池模型
 
 ![image-20191029102434267](https://tva1.sinaimg.cn/large/006y8mN6gy1g8euys7n7pj30of09omze.jpg)
@@ -57,12 +59,6 @@ Netty线程模型基于NIO实现，即非阻塞IO及多路复用。在netty中�
 
 
 
-
-
-
-
-
-
 ### 服务端
 
 两种线程池：
@@ -70,6 +66,7 @@ Netty线程模型基于NIO实现，即非阻塞IO及多路复用。在netty中�
 - io线程池：netty的boss和worker线程池。
   - boss：建立connection
   - worker：处理注册在其身上的连接connection上的各种io事件
+  - IO线程负责处理连接、各种IO事件
 - 业务线程池：**fixedThreadPool()**
   - 与worker配合处理各种请求
 
@@ -104,11 +101,11 @@ Netty线程模型基于NIO实现，即非阻塞IO及多路复用。在netty中�
 
 1、dubbo基于netty。有5种派发策略：
 
-- 默认是all：所有消息都派发到线程池，包括请求，响应，连接事件，断开事件，心跳等。 即worker线程接收到事件后，将该事件提交到业务线程池中，自己再去处理其他事。
-- direct：worker线程接收到事件后，由worker执行到底。
+- 默认是all：所有消息都派发到业务线程池，包括请求，响应，连接事件，断开事件，心跳等。
+- direct：所有消息都不派发到业务线程池，全部在 IO 线程上直接执行。
 - message：只有请求响应消息派发到线程池，其它连接断开事件，心跳等消息，直接在 IO线程上执行
 - execution：只请求消息派发到线程池，不含响应（客户端线程池），响应和其它连接断开事件，心跳等消息，直接在 IO 线程上执行
-- connection：在 IO 线程上，将连接断开事件放入队列，有序逐个执行，其它消息派发到线程池。 
+- connection：将连接断开事件放入队列，在 IO 线程上有序逐个执行，其它消息派发到线程池。 
 
 
 
