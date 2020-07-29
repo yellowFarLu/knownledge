@@ -100,6 +100,14 @@ end
 
 但是这也不是一个完美的方案，它只是相对安全一点，因为如果真的超时了，当前线程的逻辑没有执行完，其它线程也会乘虚而入。
 
+**超时的问题可以使用Redisson来解决。**
+
+Redisson有一个watch dog看门狗机制，其实是一个后台线程，每隔10秒查看下客户端是否还持有这把锁，如果是，则延长分布式锁的生存时间，直到客户端自己释放锁。
+
+
+
+
+
 
 
 ### 可重入性
@@ -311,4 +319,6 @@ RedLock严重依赖系统时间，
 [RedLock原理及源码解析](https://www.jianshu.com/p/7e47a4503b87)
 
 [RedLock真的可行吗](https://blog.csdn.net/chen_kkw/article/details/81433470)
+
+[Redis分布式锁过期时间到了的处理方案](https://blog.csdn.net/belongtocode/article/details/102511520)
 
