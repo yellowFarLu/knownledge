@@ -96,7 +96,7 @@ private static final int HASH_INCREMENT = 0x61c88647;
 
 ### 错误的示例
 
-比如会有以下的这种代码的实现。由于ThreadLocal的实现机制，在子线程中get时，我们拿到的Thread对象是当前子线程对象，那么他的ThreadLocalMap是null的，所以我们得到的value也是null。  
+比如会有以下的这种代码的实现。由于ThreadLocal的实现机制，在子线程中调用get()方法时，我们拿到的Thread对象是当前子线程对象，那么他的ThreadLocalMap是null的，所以我们得到的value也是null。  
 
 ```java
 private static void demo1() throws Exception {
@@ -146,7 +146,7 @@ public class InheritableThreadLocal<T> extends ThreadLocal<T> {
 
     /**
      * 同理，在创建ThreadLocalMap的时候不是给t.threadlocal赋值
-     *而是给inheritableThreadLocals变量赋值
+     * 而是给inheritableThreadLocals变量赋值
      * 
      */
     void createMap(Thread t， T firstValue) {
@@ -298,12 +298,11 @@ private static void demo3() throws Exception {
          * 并且InheritableThreadLocal只有在线程初始化的时候才从父线程继承数据。
          * 因此这次执行任务直接使用线程当前的InheritableThreadLocal
          */
+        System.out.println("父线程中获取inheritableThreadLocal， 值为：" +
+                inheritableThreadLocal.get());
         executorService.submit(runnable);
 
         TimeUnit.SECONDS.sleep(1);
-
-        System.out.println("父线程中获取inheritableThreadLocal， 值为：" +
-                inheritableThreadLocal.get());
 
         executorService.shutdown();
 }
@@ -315,7 +314,7 @@ private static void demo3() throws Exception {
 
 ### 解决方案
 
-如果我们能够，在submit新任务的时候在重新从父线程中拷贝所有的变量。然后将这些变量赋值给当前线程的t.inhertableThreadLocal赋值。这样就能够解决在线程池中每一个新的任务都能够获得父线程中ThreadLocal中的值而不受其他任务的影响。Alibaba的一个库解决了这个问题 [github:alibaba/transmittable-thread-local]
+如果我们能够在submit新任务的时候在重新从父线程中拷贝所有的变量。然后将这些变量赋值给当前线程的t.inhertableThreadLocal。这样就能够解决在线程池中每一个新的任务都能够获得父线程中ThreadLocal中的值而不受其他任务的影响。Alibaba的一个库解决了这个问题 [github:alibaba/transmittable-thread-local]
 
 
 
@@ -324,54 +323,48 @@ private static void demo3() throws Exception {
 这个库最简单的方式是这样使用的，通过简单的修饰，使得提交的runable拥有了上一节所述的功能。具体的API文档详见github，这里不再赘述。
 
 ```java
-TransmittableThreadLocal<String> parent = new TransmittableThreadLocal<String>();
-parent.set("value-set-in-parent");
+private static void demo4() throws Exception {
 
-Runnable task = new Task("1");
-// 额外的处理，生成修饰了的对象ttlRunnable
-Runnable ttlRunnable = TtlRunnable.get(task); 
-executorService.submit(ttlRunnable);
+        ThreadLocal<Integer> threadLocal = new TransmittableThreadLocal<>();
 
-// Task中可以读取， 值是"value-set-in-parent"
-String value = parent.get();
-```
+        // 如果是ThreadLocal，子线程无法读取到父线程的值
+//        ThreadLocal<Integer> threadLocal = new ThreadLocal<>();
 
-这个方法TtlRunnable.get(task)最终会调用构造方法，返回的是该类本身，也是一个Runable,这样就完成了简单的装饰。最重要的是在run方法这个地方。
+        // 如果是InheritableThreadLocal，子线程无法重新读取到父线程的值
+//      ThreadLocal<Integer> threadLocal = new InheritableThreadLocal<>();
 
-```java
-public final class TtlRunnable implements Runnable {
-    private final AtomicReference<Map<TransmittableThreadLocal<?>, Object>> copiedRef;
-    private final Runnable runnable;
-    private final boolean releaseTtlValueReferenceAfterRun;
+        ExecutorService executorService =
+                TtlExecutors.getTtlExecutorService(Executors.newFixedThreadPool(1));
 
-    private TtlRunnable(Runnable runnable, boolean releaseTtlValueReferenceAfterRun) {
-    //从父类copy值到本类当中
-        this.copiedRef = new AtomicReference<Map<TransmittableThreadLocal<?>, Object>>(TransmittableThreadLocal.copy());
-        this.runnable = runnable;//提交的runable,被修饰对象
-        this.releaseTtlValueReferenceAfterRun = releaseTtlValueReferenceAfterRun;
-    }
-    /**
-     * wrap method {@link Runnable#run()}.
-     */
-    @Override
-    public void run() {
-        Map<TransmittableThreadLocal<?>, Object> copied = copiedRef.get();
-        if (copied == null || releaseTtlValueReferenceAfterRun && !copiedRef.compareAndSet(copied, null)) {
-            throw new IllegalStateException("TTL value reference is released after run!");
-        }
-        //装载到当前线程
-        Map<TransmittableThreadLocal<?>, Object> backup = TransmittableThreadLocal.backupAndSetToCopied(copied);
-        try {
-            runnable.run();//执行提交的task
-        } finally {
-        //clear
-            TransmittableThreadLocal.restoreBackup(backup);
-        }
-    }
+        System.out.println("主线程开启");
+        threadLocal.set(1);
+        System.out.println("主线程读取本地变量：" + threadLocal.get());
+
+        executorService.submit(() -> {
+            System.out.println("子线程读取本地变量：" + threadLocal.get());
+        });
+
+        TimeUnit.SECONDS.sleep(1);
+
+        threadLocal.set(2);
+        System.out.println("主线程读取本地变量：" + threadLocal.get());
+
+        executorService.submit(() -> {
+            //[读到了主线程修改后的新值]
+            System.out.println("子线程读取本地变量：" + threadLocal.get());
+            threadLocal.set(3);
+            System.out.println("子线程读取本地变量：" + threadLocal.get());
+        });
+
+        TimeUnit.SECONDS.sleep(1);
+        //依旧读取的是 2
+        System.out.println("主线程读取本地变量：" + threadLocal.get());
 }
 ```
 
-在上面的使用线程池的例子当中，如果换成这种修饰的方式进行操作，B任务得到的肯定是父线程中ThreadLocal的值，解决了在线程池中InheritableThreadLocal不能解决的问题。
+**原理解析**
+
+使用装饰模式包装线程池。线程池异步执行任务之前，先从父线程的ThreadLocal里面获取到数据，然后传递给子线程。子线程执行任务。
 
 
 
@@ -379,7 +372,7 @@ public final class TtlRunnable implements Runnable {
 
 ### 更新父线程ThreadLocal值？
 
-如果线程之间出了要能够得到父线程中的值，同时想更新值怎么办呢？在前面我们有提到，当子线程copy父线程的ThreadLocalMap的时候是浅拷贝的,代表子线程Entry里面的value都是指向的同一个引用，我们只要修改这个引用的同时就能够修改父线程当中的值了。
+如果线程之间出了要能够得到父线程中的值，同时想更新值怎么办呢？在前面我们有提到，当子线程copy父线程的ThreadLocalMap的时候是浅拷贝的，代表子线程Entry里面的value都是指向的同一个引用，我们只要修改这个引用的同时就能够修改父线程当中的值了。
 
 
 
@@ -406,4 +399,6 @@ public final class TtlRunnable implements Runnable {
 [ThreadLocal内存泄漏](https://www.jianshu.com/p/a1cd61fa22da)
 
 [ThreadLocal父子线程传递数据](https://blog.csdn.net/a837199685/article/details/52712547)
+
+[transmittable-thread-local源码解析](https://blog.csdn.net/liubenlong007/article/details/107050929)
 
