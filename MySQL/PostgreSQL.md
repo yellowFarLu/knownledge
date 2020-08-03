@@ -24,3 +24,13 @@ select * from test order by position(name in 'four') desc, id desc;
 MySQL自定义排序
 
 select * from user order by field(username, 'roo111', 'root'), create_time desc;
+
+
+
+
+
+**查询表信息**
+
+select * from information_schema.columns where table_schema='public' and table_name='service_knowledge';
+
+参考 https://www.cnblogs.com/yulinlewis/p/9986622.html
