@@ -15,7 +15,7 @@ RocketMQ是一个分布式消息中间件，底层基于队列模型来实现消
 - Topic：主体。用于消息分类，类似于一级分类
 - Tag：我们可以理解为第二级消息类型。在应用系统中，一个Tag标识为一类消息中的二级分类，比如交易信息下的交易创建、交易完成。
 - group：RocketMQ中也有组的概念。代表具有相同角色的生产者组合或消费者组合，称为生产者组或消费者组。
-  - 当一个生产者挂掉之后，可以继续让该组的另外一个生产者实例发送消息，不至于导致业务走不下去。
+  - 当一个生产者挂掉之后，可以继续让该group的另外一个生产者实例发送消息，不至于导致业务走不下去。
   - 在消费者组中，可以实现消息消费的负载均衡和消息容错目标。
   - 有了group，在集群下，动态扩展容量很方便。只需要在新加的机器中，配置相同的group。启动后，就立即能加入到所在的群组中，参与消息生产或消费。
 - Message：Message 是消息的载体。一个 Message 必须指定 topic。Message 还有一个可选的 tag 设置，以便消费端可以基于 tag 进行过滤消息。也可以添加额外的键值对，例如你需要一个业务 key 来查找 broker 上的消息，方便在开发过程中诊断问题。
@@ -33,8 +33,8 @@ RocketMQ是一个分布式消息中间件，底层基于队列模型来实现消
 - 启动Nameserver，Nameserver起来后监听端口，等待Broker、Produer、Consumer连上来，相当于一个路由控制中心。
 - Broker启动，跟所有的Nameserver保持长连接，定时发送心跳包。心跳包中包含当前Broker信息(IP+端口等)以及存储所有topic信息。注册成功后，Nameserver集群中就有Topic跟Broker的映射关系。
 - 收发消息前，先创建topic，创建topic时需要指定该topic要存储在哪些Broker上。也可以在发送消息时自动创建Topic。
-- Producer发送消息，启动时先跟Nameserver集群中的其中一台建立长连接，并从Nameserver中获取当前发送的Topic存在哪些Broker上，然后跟对应的Broker建立长连接，直接向Broker发消息。
-- Consumer跟Producer类似。跟其中一台Nameserver建立长连接，获取当前订阅Topic存在哪些Broker上，然后直接跟Broker建立连接通道，开始消费消息。
+- Producer发送消息，启动时先跟Nameserver集群中的其中一台建立长连接，并从Nameserver中获取当前发送的Topic的消息存在哪些Broker上，然后跟对应的Broker建立长连接，直接向Broker发消息。
+- Consumer跟Producer类似。跟其中一台Nameserver建立长连接，获取当前订阅Topic的消息存在哪些Broker上，然后直接跟Broker建立连接通道，开始消费消息。
 
 
 
