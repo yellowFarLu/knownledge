@@ -34,3 +34,18 @@ select * from user order by field(username, 'roo111', 'root'), create_time desc;
 select * from information_schema.columns where table_schema='public' and table_name='service_knowledge';
 
 参考 https://www.cnblogs.com/yulinlewis/p/9986622.html
+
+
+
+
+
+
+
+**数组varchar[]类型的值操作**
+
+```
+update service_knowledge set scenary = array_remove(scenary, 'app')  where tenant_id = '1' and 'Om6iezair' = any(scenary) and 'app' = any(scenary)
+update service_knowledge set scenary = array_replace(scenary, 'Om6iezair', 'app') where tenant_id = '1' and 'Om6iezair' = any(scenary);
+```
+
+大概意思是scenary 如果包含了Om6iezair、app， 就把scenary中的app删掉。然后把Om6iezair 替换成app
