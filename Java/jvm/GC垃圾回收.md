@@ -602,7 +602,7 @@ HandlePromotionFailure一般打开，避免频繁Full GC。
 
 **在JDK6之后，已经不再使用HandlePromotionFailure这个参数了，JDK6之后的规则变为：**
 
-- 只要老年代的连续内存空间 大于新生代对象总大小 或者 大于历次晋升的对象平均大小，就进行minor GC，否则进行Full GC。
+- 只要老年代的连续内存空间 大于新生代对象总大小 或者 大于历次晋升的对象总体平均大小，就进行minor GC，否则进行Full GC。
 
 
 

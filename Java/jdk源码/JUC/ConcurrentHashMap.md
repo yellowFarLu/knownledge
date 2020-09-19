@@ -38,19 +38,19 @@ Segement + HashEntry （分段锁技术）
 
 ## JDK 1.8实现
 
-Node + CAS + Synchronized
+数组 + CAS + Synchronized
 
-- 取消了segment分段的形式，**每个链表为单位进行加锁**，表头元素作为锁。进一步减少了并发冲突的概率，提高了并发度。
+- 取消了segment分段的形式，**每个链表为单位进行加锁**，表头元素作为锁。加锁的范围小了，进一步减少了并发冲突的概率，提高了并发度。
 - 当元素个数小于8时，采用链表形式。单个数大于等于8时，采用红黑树结构。（为了避免单个列表太长，导致查询时间复杂度为O(n)的情况）
 - CAS实现乐观锁，保证更新值的线程安全
-- synchronized更新桶元素的线程安全（如插入、清空等操作）
+- synchronized保证更新桶元素的线程安全，如插入、清空等操作。
 
 
 
 ### 优点
 
 - 相对于jdk.17，jdk1.8根据桶为粒度加锁，并发读更高了。
-- 避免计算位置的2次hash运算。
+- 避免计算元素位置的2次hash运算。
 - JAVA7之前ConcurrentHashMap主要采用锁机制，在对某个Segment进行操作时，将该Segment锁定，不允许对其进行非查询操作，而在JAVA8之后采用CAS无锁算法，这种乐观操作在完成前进行判断，如果符合预期结果才给予执行，对并发操作提供良好的优化。（不会阻塞线程）
 
 
@@ -73,9 +73,10 @@ ConcurrentHashMap可以做到读取数据不加锁，并且其内部的结构可
 
 ## 和HashMap的区别
 
-ConcurrentHashMap的key、value都不能为null
+- ConcurrentHashMap是线程安全的，hashMap是非线程安全的。
+- ConcurrentHashMap的key、value都不能为null
 
-HashMap的key、value都可以为null，存储在index=0的桶上面
+- HashMap的key、value都可以为null，存储在index=0的桶上面
 
 
 
@@ -110,7 +111,7 @@ HashMap的key、value都可以为null，存储在index=0的桶上面
 
 如果元素的新位置 等于 原来的位置 + 数组旧容量，则把该元素放入hn链表；
 
-如果没有这两条链表的话，每次迁移一个元素都要重新计算迁移后桶的位置。所以通过这样子进行优化，减少了扩容过程中计算桶位置的次数
+如果没有这两条链表的话，每次迁移一个元素都要重新计算迁移后桶的位置。所以通过这样子进行优化，减少了扩容过程中计算桶位置的次数，从而提高扩容的性能。
 
 
 
