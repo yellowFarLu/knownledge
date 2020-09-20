@@ -300,8 +300,32 @@ Zigzag 编码用无符号数来表示有符号数字，正数和负数交错，�
 
 
 
+## 总结
+
+- Protocol Buffer序列化/反序列化 速度快的原因是：
+  - 编码 / 解码的方式简单，只需要进行简单的数学运算、位移操作等
+  - 采用Protocol Buffer 自身框架代码 和编译器共同完成
+- Protocol Buffer数据压缩效果好，原因是：
+  - 采用了独特的编码方式，如varint、Zigzag编码方式等等。
+  - 采用T-L-V的数据存储方式，数据存储紧凑
+- Protocol Buffer的序列化过程分为两步：
+  - 根据数据类型，将数据进行编码
+  - 将数据按照T-L-V的格式存储到字节流中
+- Protocol Buffer的反序列化分为两步：
+  - 解析对应的二进制字节流
+  - 将解析的数据读取到对象的字段中
+
+
+
+
+
+
+
 ## 参考
 
 [Protocol Buffer原理](https://www.ibm.com/developerworks/cn/linux/l-cn-gpb/)
 
 [ProtoBuf实战](https://blog.csdn.net/zhglance/article/details/56017926)
+
+[Protocol Buffer原理剖析](https://cloud.tencent.com/developer/article/1394349)
+

@@ -8,15 +8,13 @@
 
 ### 基本类型
 
-![image-20190216171918836](https://ws3.sinaimg.cn/large/006tKfTcgy1g08dxrqn2rj30m20botbh.jpg)
-
 - java的基础类型有哪些？
   - java总共8个基础数据类型，如下：
     - byte、char、boolean、shot、int、long、float、double
 - **基本类型直接存储值**，并且存储于栈中，因此更加高效。
 - **java中基本类型的存储空间大小是固定的**，不会随机器硬件架构的变化而变化。这是java更加具有移植性的原因之一。
 
-- char占用2个字节、float占用4字节
+- byte占用1字节、char占用2个字节、boolean占用字节不固定、short占用2字段、int占用4字节、long占用8字节、float占用4字节、double占用8字节
 - boolean类型占几个字节？
   - 《Java虚拟机规范》中是4字节，具体占用字节数看虚拟机实现。Java语言中的boolean值，在编译之后，都使用int类型来代替。
   - 为什么使用int，因为对于32位处理器来说，一次处理数据是32位，具有高效存取的特点
@@ -925,3 +923,6 @@ public class SizeDemo {
 ## 参考
 
 [形参和实参的区别](https://blog.csdn.net/qq_33187168/article/details/50346465)
+
+[Java基础 Cyc2018](https://github.com/CyC2018/CS-Notes/blob/master/notes/Java%20%E5%9F%BA%E7%A1%80.md)
+
