@@ -323,9 +323,9 @@ Zigzag 编码用无符号数来表示有符号数字，正数和负数交错，�
 
 ## 参考
 
+[Protocol Buffer原理剖析，推荐看这个](https://cloud.tencent.com/developer/article/1394349)
+
 [Protocol Buffer原理](https://www.ibm.com/developerworks/cn/linux/l-cn-gpb/)
 
 [ProtoBuf实战](https://blog.csdn.net/zhglance/article/details/56017926)
-
-[Protocol Buffer原理剖析](https://cloud.tencent.com/developer/article/1394349)
 
