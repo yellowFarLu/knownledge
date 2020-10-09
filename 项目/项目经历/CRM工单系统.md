@@ -26,13 +26,10 @@ CRM工单系统（服务通）为用户提供一个完整服务流程，并且�
 
 ## 系统架构
 
-依赖PASS能力实现CRM工单系统。
+![image-20201009233958834](https://tva1.sinaimg.cn/large/007S8ZIlgy1gjjid2pwwgj30xy0h8my5.jpg)
 
-![image-20200418112734427](/Users/huangyuan/Library/Application Support/typora-user-images/image-20200418112734427.png)
-
-新建订单，就是往PAAS对象平台写入数据。
-
-更新订单，就是去更新PAAS对象平台的数据。
+- paas服务是负责读写、更新、删除工单对象数据的一个储存服务
+- MongoDB用于记录请求日志
 
 
 
