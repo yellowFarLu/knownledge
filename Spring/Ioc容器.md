@@ -152,13 +152,17 @@ ContextLoaderListener 实现了 javax.servlet.ServletContextListener，这个是
 
 
 
-##Bean的生命周期
+## Bean的生命周期
 
-入口:org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#doCreateBean
-
-在实例化Bean的时候，开启Bean的生命周期。初始化的过程，简单来说就是**构造器初始化Bean，进行依赖注入，在初始化的过程中调用一些扩展**，其流程如下：
+**注意：SpringBoot的Bean 生命周期也是下面这套，因为SpringBoot本质上还是Spring。**
 
 
+
+**代码入口**：org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#doCreateBean
+
+
+
+在实例化Bean的时候，开启Bean的生命周期。初始化的过程，简单来说就是**构造器初始化Bean，设置属性，设置属性的过程中触发依赖注入，整个初始化的过程中调用一些扩展，然后是使用bean执行业务逻辑，最后销毁bean**，其流程如下：
 
 - **构造器初始化**
 - **设置Bean的属性**
