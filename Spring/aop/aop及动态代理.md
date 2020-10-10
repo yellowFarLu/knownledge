@@ -18,7 +18,7 @@
 代理模式(Proxy Pattern) ：给某一个对象提供一个代
 理，并由代理对象控制对原对象的引用。代理模式的英文叫做Proxy或Surrogate，它是一种对象结构型模式。
 
-![](https://ws1.sinaimg.cn/large/006tNbRwgy1fxwzsi18sbj30ir0f3q42.jpg)
+
 
 
 
@@ -74,13 +74,9 @@
 
 ### 类加载机制
 
-![](https://ws1.sinaimg.cn/large/006tNbRwgy1fxwxytw2u6j30j00dnwfy.jpg)
-
 
 
 ### 动态代理类加载机制
-
-![](https://ws3.sinaimg.cn/large/006tNbRwgy1fxwy05udwlj30pn0e7abx.jpg)
 
 
 
@@ -313,6 +309,12 @@ ASM \> Javassist Bytecode \> Cglib \> JDK \> Javassist ProxyFactory
 
 
 ### 概述
+
+简单的表述Spring Aop的实现，就是在Ioc容器进行依赖注入的时候，注入的是动态代理对象，这个动态代理对象可以是JDK动态代理的方式生成，也可以是CGLib的方式生成。然后在请求代理方法的时候，把请求转发到handler处理器，然后经过代理逻辑，然后再执行真正的方法。
+
+参考：《Spring技术内幕》
+
+
 
 spring中代理实现代码增强几种方式：
 
