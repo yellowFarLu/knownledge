@@ -28,6 +28,207 @@ arthas可以定位的问题例如：
 
 
 
+## 常用命令
+
+
+
+### logger
+
+参考：https://arthas.aliyun.com/doc/logger.html
+
+
+
+#### 查看logger信息
+
+使用logger命令可以查看所有logger信息。
+
+```java
+[arthas@2062]$ logger
+ name                                   ROOT
+ class                                  ch.qos.logback.classic.Logger
+ classLoader                            sun.misc.Launcher$AppClassLoader@2a139a55
+ classLoaderHash                        2a139a55
+ level                                  INFO
+ effectiveLevel                         INFO
+ additivity                             true
+ codeSource                             file:/Users/hengyunabc/.m2/repository/ch/qos/logback/logback-classic/1.2.3/logback-classic-1.2.3.jar
+ appenders                              name            CONSOLE
+                                        class           ch.qos.logback.core.ConsoleAppender
+                                        classLoader     sun.misc.Launcher$AppClassLoader@2a139a55
+                                        classLoaderHash 2a139a55
+                                        target          System.out
+                                        name            APPLICATION
+                                        class           ch.qos.logback.core.rolling.RollingFileAppender
+                                        classLoader     sun.misc.Launcher$AppClassLoader@2a139a55
+                                        classLoaderHash 2a139a55
+                                        file            app.log
+                                        name            ASYNC
+                                        class           ch.qos.logback.classic.AsyncAppender
+                                        classLoader     sun.misc.Launcher$AppClassLoader@2a139a55
+                                        classLoaderHash 2a139a55
+                                        appenderRef     [APPLICATION]
+```
+
+对应的logback.xml为：
+
+```java
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appender name="APPLICATION" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>app.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>mylog-%d{yyyy-MM-dd}.%i.txt</fileNamePattern>
+            <maxFileSize>100MB</maxFileSize>
+            <maxHistory>60</maxHistory>
+            <totalSizeCap>2GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%logger{35} - %msg%n</pattern>
+        </encoder>
+    </appender>
+ 
+    <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="APPLICATION" />
+    </appender>
+ 
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%-4relative [%thread] %-5level %logger{35} - %msg %n
+            </pattern>
+            <charset>utf8</charset>
+        </encoder>
+    </appender>
+ 
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="ASYNC" />
+    </root>
+</configuration>
+```
+
+
+
+#### 更新日志级别
+
+```java
+[arthas@2062]$ logger --name ROOT --level debug
+update logger level success.
+```
+
+更新ROOT的日志级别为debug。
+
+
+
+#### 指定classloader更新 logger level
+
+默认情况下，logger命令会在SystemClassloader下执行，如果应用是传统的`war`应用，或者spring boot fat jar启动的应用，那么需要指定classloader。
+
+可以先用 `sc -d yourClassName` 来查看具体的 classloader hashcode，然后在更新level时指定classloader：
+
+```java
+[arthas@2062]$ logger -c 2a139a55 --name ROOT --level debug
+```
+
+
+
+
+
+### heapdump
+
+生成快照，参考：https://arthas.aliyun.com/doc/heapdump.html
+
+
+
+
+
+### watch
+
+观察方法执行情况，比如说入参、返回值
+
+
+
+#### 观察方法调用前的参数，调用后的参数
+
+示例：`watch demo.MathGame primeFactors "{params,target,returnObj}" -x 2 -b -s -n 2`
+
+格式：`watch 类的全限定名 方法名 表达式`
+
+![image-20201027163945909](https://tva1.sinaimg.cn/large/0081Kckwgy1gk3zde9rwxj30ui0h90vy.jpg)
+
+![image-20201027164223920](https://tva1.sinaimg.cn/large/0081Kckwgy1gk3zg37k44j31aj0gfdiq.jpg)
+
+
+
+#### 观察对象的属性
+
+访问整个对象示例，target表示对象： `watch demo.MathGame primeFactors 'target'`
+
+访问对象的某个属性示例： `watch demo.MathGame primeFactors 'target.illegalArgumentCount'`
+
+- watch只可以访问成员变量，静态变量 无论是public，还是private都不能用watch访问。
+
+
+
+参考：https://arthas.aliyun.com/doc/watch.html
+
+
+
+
+
+### trace
+
+方法内部调用路径，并输出方法路径上的每个节点上耗时。
+
+参考：https://arthas.aliyun.com/doc/trace.html
+
+
+
+
+
+### stack
+
+输出当前方法被调用的调用路径。
+
+参考：https://arthas.aliyun.com/doc/stack.html
+
+
+
+
+
+### tt
+
+记录下指定方法每次调用的入参和返回信息，并能对不同时间下的调用进行观测
+
+- 首先查看方法的每次调用情况  `tt -t demo.MathGame primeFactors`
+- 查看单次调用的入参、出参  `tt -i 1003`   
+  - 1003是Index，即时间片段记录编号
+
+ 参考：https://arthas.aliyun.com/doc/tt.html
+
+
+
+
+
+### profiler
+
+`profiler` 命令支持生成应用热点的火焰图。本质上是通过不断的采样，然后把收集到的采样结果生成火焰图。
+
+参考：https://arthas.aliyun.com/doc/profiler.html
+
+
+
+
+
+
+
+
+
+## 后台异步任务
+
+参考：https://arthas.aliyun.com/doc/async.html
+
+
+
 
 
 ## 扩展
