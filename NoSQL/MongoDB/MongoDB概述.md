@@ -51,6 +51,14 @@ MongoDB 将数据存储为一个文档，数据结构由键值(key=>value)对组
 
 
 
+## 细节
+
+- Mongo对应的库、表不存在，则会自动创建对应的库、表
+
+
+
+
+
 ## 参考
 
 [MonogoDB和Redis的区别](https://www.cnblogs.com/java-spring/p/9488227.html)

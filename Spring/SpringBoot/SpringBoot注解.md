@@ -24,9 +24,9 @@
 
 **这三个注解的作用分别为：**
 
-- @SpringBootConfiguration：标注当前类是配置类，这个注解继承自@Configuration。并会将当前类内声明的一个或多个以@Bean注解标记的方法的实例纳入到srping容器中，并且实例名就是方法名。
-- @EnableAutoConfiguration：是自动配置的注解，这个注解会根据我们添加的组件jar来完成一些默认配置，我们做微服务时会添加spring-boot-starter-web这个组件jar的pom依赖，这样配置会默认配置springmvc 和tomcat。
-- @ComponentScan：扫描当前包及其子包下被@Component，@Controller，@Service，@Repository注解标记的类并注入到spring容器中进行管理。等价于<context:component-scan>的xml配置文件中的配置项。
+- @SpringBootConfiguration：标注当前类是配置类，这个注解继承自@Configuration。并会将当前类内声明的一个或多个以@Bean注解标记的方法的实例纳入到spring容器中，并且实例名就是方法名。
+- @EnableAutoConfiguration：是自动配置的注解，这个注解会根据我们添加的组件jar来完成一些默认配置，比如：我们做微服务时会添加spring-boot-starter-web这个组件jar的pom依赖，这样配置会默认配置springmvc 和tomcat。
+- @ComponentScan：扫描**被注解类的 当前包及其子包下**被@Component，@Controller，@Service，@Repository注解标记的类并注入到spring容器中进行管理。等价于<context:component-scan>的xml配置文件中的配置项。
 
 大多数情况下，这3个注解会被同时使用，因此，这三个注解就被做了包装，成为了@SpringBootApplication注解。
 
@@ -97,16 +97,23 @@ MapperScan注解的使用参考：https://blog.csdn.net/manchengpiaoxue/article/
 
 @ImportResource用于导入其他xml配置文件，可以看到其参数指定的是配置文件路径。
 
+注意我们的配置文件一般都在resources文件夹下面，所以路径上面最好加上classpath:前缀，这样子就会从java环境变量中查找了，也就会从resources文件夹下面查找了
+
 ```java
-@Configuration
-@ImportResource(value = "beans-another.xml")
-public class SpringConfiguration {
- 
-    @Bean(name = "stu",autowire = Autowire.BY_TYPE)
-    @Scope(value = "singleton")
-    public Student student(){
-        return new Student(11,"jack",22);
+import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ImportResource;
+
+@MapperScan("com.example.mapper") //扫描的mapper
+@ImportResource(value = "classpath:provider.xml")
+@SpringBootApplication
+public class ProviderApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(ProviderApplication.class, args);
     }
+
 }
 ```
 
