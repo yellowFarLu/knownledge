@@ -61,3 +61,8 @@
 ## 参考
 
 [MyBatis一级缓存和二级缓存](https://www.jianshu.com/p/5515640d14fe)
+
+[MyBatis-系统缓存及简单配置介绍](https://www.cnblogs.com/jian0110/p/9387941.html)
+
+[MyBatis-SqlSession运行原理](https://www.cnblogs.com/jian0110/p/9452592.html)
+
