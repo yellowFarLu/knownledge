@@ -13,3 +13,14 @@
 
 参考：https://blog.csdn.net/peade/article/details/83717345?depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromBaidu-2&utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromBaidu-2
 
+
+
+**源代码打包**
+
+mvn clean source:jar deploy
+
+
+
+**Maven配置多个数据源**
+
+https://www.cnblogs.com/silyvin/p/10031682.html
