@@ -2,6 +2,12 @@
 
 
 
+**冲突解决工具**
+
+Maven Helper  https://gblfy.blog.csdn.net/article/details/100514487
+
+
+
 **not class def**
 
 1. 可能是jar包冲突，把不要的版本exclusive掉

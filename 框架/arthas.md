@@ -165,7 +165,7 @@ update logger level success.
 
 访问对象的某个属性示例： `watch demo.MathGame primeFactors 'target.illegalArgumentCount'`
 
-- 格式： watch 类全限定名 'target.属性名称'
+- 格式： watch 类全限定名 方法名 'target.属性名称'
 - watch只可以访问成员变量
 - 静态变量 无论是public，还是private都不能用watch访问。
 
