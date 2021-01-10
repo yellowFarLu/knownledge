@@ -548,7 +548,7 @@ Via是为了追踪请求和响应报文的传输路径。
 
 ##### User-Agent
 
-用于给服务传递浏览器的名称等信息。
+用于给服务器传递浏览器的名称等信息。
 
 ![image-20190916174706170](http://ww2.sinaimg.cn/large/006y8mN6gy1g71i3zca5ej30m401m0st.jpg)
 
