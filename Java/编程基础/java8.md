@@ -31,6 +31,31 @@ Consumer<Integer> consumer1 = x -> {
 
 
 
+### 进行方法调用
+
+```java
+public static void main(String[] args) {
+
+  // 写法一
+  Consumer<Integer> consumer = x -> {
+    System.out.println(x);
+  };
+
+  ifInit(consumer);
+
+  // 写法二
+  ifInit(x -> System.out.println(x.longValue()));
+}
+
+static void ifInit(Consumer<Integer> consumer) {
+  consumer.accept(10);
+}
+```
+
+
+
+
+
 
 
 ## Java8中的->
@@ -52,6 +77,20 @@ List<String> arr = new ArrayList<>().stream().map(p-> p.toString()).collect(Coll
 ![image-20210110152756717](https://tva1.sinaimg.cn/large/008eGmZEly1gmimrqizxtj31bk0isn16.jpg)
 
 由此得证明。
+
+
+
+## paralleStream
+
+参考：https://www.cnblogs.com/pengzhizhong/p/10191842.html
+
+
+
+
+
+## flatMap
+
+参考：
 
 
 

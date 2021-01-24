@@ -32,7 +32,7 @@
 - 自动包装不能应用于数组。比如，int[]不能自动包装成Integer[]。
 
 ```java
-Integer x = 2;     // 装箱 调用了 Integer.valueOf(2)
+Integer x = 1;     // 装箱 调用了 Integer.valueOf(1)
 int y = x;         // 拆箱 调用了 x.intValue()
 ```
 
