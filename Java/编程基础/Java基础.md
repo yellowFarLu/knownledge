@@ -471,13 +471,17 @@ hashCode() 返回散列值，而 equals() 是用来判断两个对象是否等�
 
 **为什么重写equals()一定要重写hashCode()？**
 
-`根据hashCode的规定，两个对象相等，那么他们的hashCode也一定相等`。
+因为在Map容器里面，判断两个Key是否相等，条件为：
 
-假如只重写了equals方法，那么两个对象可能判断为相等，但是调用hashCode()方法返回的哈希值不相等，这就违反了前面说的规定。因此，重写了euqals方法一定要重写hashCode()方法。
+（1）key1的hash值和key2相等，并且key1 == key2
 
-这样子可以保证容器的正确使用，比如说HashMap在查找元素的时候，就是通过equals和hash判断元素是否相等的，两者一致，那么元素才能查找到，因此要保持一致。
+（2）key1.equals(key2) 值为true
 
-参考: [为什么重写equals()一定要重写hashCode()方法](https://blog.csdn.net/xl_1803/article/details/80445481)
+满足上述其中一个条件即可。JDK代码里面容器用到了这样的判断，因此必须要两个方法都重写，才能保证容器使用的正确性。
+
+Set的底层使用Map来实现，如果没有同时重写equals()、hashCode()方法，就无法保证key的唯一性。
+
+String正是因为重写了这两个方法，我们才可以愉快的使用String对象作为key，而不必担心覆盖的问题。
 
 
 
