@@ -899,6 +899,14 @@ public class SizeDemo {
 
 
 
+## 通配符
+
+参考：[PECS原则](https://blog.csdn.net/deargua/article/details/76100881)
+
+
+
+
+
 
 
 ## 问题
@@ -934,4 +942,3 @@ public class SizeDemo {
 [形参和实参的区别](https://blog.csdn.net/qq_33187168/article/details/50346465)
 
 [Java基础 Cyc2018](https://github.com/CyC2018/CS-Notes/blob/master/notes/Java%20%E5%9F%BA%E7%A1%80.md)
-

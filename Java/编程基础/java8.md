@@ -96,6 +96,75 @@ List<String> arr = new ArrayList<>().stream().map(p-> p.toString()).collect(Coll
 
 
 
+## Collectors.toMap
+
+【强制】在使用`java.util.stream.Collectors`类的`toMap()`方法转为`Map`集合时，一定要使用含有参数类型为`BinaryOperator`，参数名为`mergeFunction`的方法，否则当出现相同key值时会抛出IllegalStateException异常。
+说明：参数mergeFunction的作用是当出现key重复时，自定义对value的处理策略。
+正例：
+
+```java
+List<Pair<String, Double>> pairArrayList = new ArrayList<>(3);
+pairArrayList.add(new Pair<>("version", 6.19));
+pairArrayList.add(new Pair<>("version", 10.24));
+pairArrayList.add(new Pair<>("version", 13.14));
+Map<String, Double> map = pairArrayList.stream().collect(
+// 生成的map集合中只有一个键值对：{version=13.14}
+Collectors.toMap(Pair::getKey, Pair::getValue, (v1, v2) -> v2));
+
+// (v1, v2) -> v2 其实是告诉JDK在遇到重复元素的时候怎么处理，这里是取第二个。
+```
+
+反例：
+
+```java
+String[] departments = new String[] {"iERP", "iERP", "EIBU"};
+// 抛出IllegalStateException异常
+Map<Integer, String> map = Arrays.stream(departments)
+    .collect(Collectors.toMap(String::hashCode, str -> str));
+```
+
+参考：https://blog.csdn.net/neweastsun/article/details/80294811
+
+
+
+
+
+## Filter过滤
+
+```java
+public static void main(String[] args) {
+  OuterTenantInfo one = new OuterTenantInfo();
+  one.setOuterUid(1);
+  one.setName("one");
+
+  OuterTenantInfo two = new OuterTenantInfo();
+  two.setOuterUid(2);
+  two.setName("two");
+
+  OuterTenantInfo three = new OuterTenantInfo();
+  three.setOuterUid(3);
+  three.setName("three");
+
+  List<OuterTenantInfo> accounts = new ArrayList<>();
+  accounts.add(one);
+  accounts.add(two);
+  accounts.add(three);
+
+  List<OuterTenantInfo> newList = accounts.stream().filter(item -> item.getOuterUid() > 1).collect(Collectors.toList());
+  System.out.println(newList);
+}
+```
+
+输出：
+
+```json
+[OuterTenantInfo{outerUid=2, name='two'}, OuterTenantInfo{outerUid=3, name='three'}]
+```
+
+https://blog.csdn.net/xinyang12138/article/details/86526540
+
+
+
 
 
 ## 扩展
