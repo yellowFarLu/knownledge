@@ -2,6 +2,14 @@
 
 
 
+### 找文件 find
+
+`find / -name antx.properties`
+
+https://blog.csdn.net/weixin_33940102/article/details/91618540
+
+
+
 
 
 ssh
