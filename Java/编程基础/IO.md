@@ -307,7 +307,11 @@ FilterInputStream和FilterOutputStream是用来提供装饰器类接口以控制
 
 
 
+## 读取jar包中的文件
 
+参考：https://blog.csdn.net/u013467442/article/details/88807557
+
+​            https://www.iteye.com/blog/hxraid-483115
 
 
 

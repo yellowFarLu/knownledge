@@ -30,3 +30,9 @@ mvn clean source:jar deploy
 **Maven配置多个数据源**
 
 https://www.cnblogs.com/silyvin/p/10031682.html
+
+
+
+**继承配置**
+
+参考：https://zhuanlan.zhihu.com/p/158139580
