@@ -309,7 +309,24 @@ FilterInputStream和FilterOutputStream是用来提供装饰器类接口以控制
 
 ## 读取jar包中的文件
 
-参考：https://blog.csdn.net/u013467442/article/details/88807557
+```java
+JarFile jarFile = new JarFile(file);
+
+// XXX 是相对路径，相对jar包下面resource路径，一般是前面没有/
+JarEntry jarEntry = jarFile.getJarEntry("XXXX");
+
+if (jarEntry == null) {
+  log.info("jarFile getJarEntry is null, path={}", file);
+  return new ArrayList<>();
+}
+
+// 根据实体创建输入流
+inputStream = jarFile.getInputStream(jarEntry);
+```
+
+参考：https://www.javatt.com/p/81226
+
+​            https://blog.csdn.net/u013467442/article/details/88807557
 
 ​            https://www.iteye.com/blog/hxraid-483115
 
